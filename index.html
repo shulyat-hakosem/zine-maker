@@ -39,14 +39,14 @@ textarea{width:100%;font-family:inherit;direction:rtl}
 @media (max-width:800px){html,body{overflow:auto;height:auto}main{flex-direction:column}#panel{flex:none}#edWrap{flex:none;height:62vh}#gridWrap{max-height:40vh}header{flex-wrap:wrap}}
 </style></head><body>
 <header><h1>✂️ יוצר זינים</h1>
-<select id="mode" title="מצב"><option value="8">8 עמ׳ (A4 אחד)</option><option value="16">16 עמ׳ (2×A4 דו-צדדי)</option></select>
+<select id="mode" title="מצב"><option value="8">8 עמ׳ (A4 אחד)</option><option value="16">16 עמ׳</option></select>
 <button id="bulk" title="תמונה אחת לכל עמוד, לפי סדר שמות הקבצים">מילוי עמודים מתמונות…</button>
 <button id="pdf" class="pri" title="דפי הדפסה A4 מסודרים לקיפול">🖨 PDF להדפסה</button>
 <label title="קווי עזר אפורים דקים לקיפול ולגזירה"><input type="checkbox" id="guides" checked> קווי עזר</label>
 <button id="helpBtn">❓ הוראות קיפול</button>
 <details class="menu"><summary>⚙️ עוד</summary><div class="pop">
 <label>כיוון קריאה: <select id="dir"><option value="rtl">עברית (שדרה מימין)</option><option value="ltr">לועזית (שדרה משמאל)</option></select></label>
-<label id="lay16L">פריסה: <select id="lay16"><option value="octavo">דף A4 אחד דו-צדדי – קיפול ×3, בלי גזירה</option><option value="one">דף אחד חד-צדדי (שני חצאים, עם גזירה)</option><option value="booklet">חוברת מהודקת – 2 דפי A4 דו-צדדי</option></select></label>
+<label id="lay16L">פריסה: <select id="lay16"><option value="loop">דף A4 אחד חד-צדדי – 4×4 עם חריצים (מומלץ)</option><option value="octavo">דף A4 אחד דו-צדדי – קיפול ×3, בלי גזירה</option><option value="one">דף אחד חד-צדדי (שני חצאים, עם גזירה)</option><option value="booklet">חוברת מהודקת – 2 דפי A4 דו-צדדי</option></select></label>
 <label id="flipL">דו-צדדי: <select id="flip"><option value="short">היפוך בצד הקצר</option><option value="long">היפוך בצד הארוך</option></select></label>
 <label>סגנון קווים: <select id="gstyle"><option value="solid">קו דק רציף</option><option value="dashed">קו מקווקו</option></select></label>
 <label><input type="checkbox" id="safe"> סימון שוליים בטוחים בהדפסה</label>
@@ -521,7 +521,7 @@ function linkSpread(i){const k=spKey(i),j=(k+1)%N();const a=P.pages[k],b=P.pages
  const base=a.img?a:b.img?b:a;const other=base===a?b:a;const sp=toSpread(base,base===a?ha:hb);const ot=toSpread(other,other===a?ha:hb);sp.texts=sp.texts.concat(ot.texts);sp.els=(sp.els||[]).concat(ot.els||[]);P.spreads[k]=sp;}
 function unlinkSpread(k){const sp=P.spreads[k];const j=(k+1)%N();P.pages[k]=fromSpread(sp,spHalf(k));P.pages[j]=fromSpread(sp,spHalf(j));delete P.spreads[k];}
 function unlinkAll(){Object.keys(P.spreads||{}).forEach(k=>unlinkSpread(+k));}
-function pageMM(){return (P.mode==8||lay()=='octavo')?[297/4,105]:lay()=='one'?[52.5,74.25]:[105,148.5];}
+function pageMM(){return (P.mode==8||lay()=='octavo')?[297/4,105]:(lay()=='one'||lay()=='loop')?[52.5,74.25]:[105,148.5];}
 // ---------- rendering (aspect = page w/h) ----------
 // ---------- collage elements (seeded procedural) ----------
 function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
@@ -644,16 +644,18 @@ $('save').onclick=()=>dbPut(JSON.stringify(P)).then(()=>{try{localStorage.setIte
 function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();}
 $('exp').onclick=()=>download(new Blob([JSON.stringify(P)],{type:'application/json'}),'zine-project.json');
 $('imp').onclick=()=>$('impf').click();$('impf').onchange=async e=>{const f=e.target.files[0];if(!f)return;setProject(JSON.parse(await f.text()));e.target.value='';};
-function setProject(p){P=p;P.spreads=P.spreads||{};ensure();cur=0;curT=-1;$('mode').value=P.mode;$('dir').value=P.dir||'rtl';$('lay16').value=P.layout16||'octavo';help();refreshAll();}
+function setProject(p){P=p;P.spreads=P.spreads||{};ensure();cur=0;curT=-1;$('mode').value=P.mode;$('dir').value=P.dir||'rtl';$('lay16').value=P.layout16||'loop';help();refreshAll();}
 // ---------- imposition ----------
 // returns sheets: [{side:'front'|'back', cells:[{page, x,y,w,h (mm), rot}]}]; A4 landscape for 8, A4 portrait for 16
 function rtl(){return (P.dir||'rtl')=='rtl';}
-function lay(){return P.mode==16?(P.layout16||'octavo'):'one';}
+function lay(){return P.mode==16?(P.layout16||'loop'):'one';}
+const LOOP={"ltr": [[[10, 180], [9, 180], [8, 180], [7, 180]], [[11, 0], [12, 0], [5, 0], [6, 0]], [[14, 180], [13, 180], [4, 180], [3, 180]], [[15, 0], [0, 0], [1, 0], [2, 0]]], "rtl": [[[7, 180], [8, 180], [9, 180], [10, 180]], [[6, 0], [5, 0], [12, 0], [11, 0]], [[3, 180], [4, 180], [13, 180], [14, 180]], [[2, 0], [1, 0], [0, 0], [15, 0]]]};
 const OCT={"ltr": {"front": [[[10, 180], [5, 180], [6, 180], [9, 180]], [[13, 0], [2, 0], [1, 0], [14, 0]]], "back": [[[8, 180], [7, 180], [4, 180], [11, 180]], [[15, 0], [0, 0], [3, 0], [12, 0]]]}, "rtl": {"front": [[[5, 180], [10, 180], [9, 180], [6, 180]], [[2, 0], [13, 0], [14, 0], [1, 0]]], "back": [[[7, 180], [8, 180], [11, 180], [4, 180]], [[0, 0], [15, 0], [12, 0], [3, 0]]]}};
 function impose(){const out=[];
  if(P.mode==8){const W=297/4,H=105;let top=[4,3,2,1],bot=[5,6,7,0];if(rtl()){top.reverse();bot.reverse();} // 0-based reading index: 0=cover..7=back
   const cells=[];top.forEach((p,c)=>cells.push({page:p,x:c*W,y:0,w:W,h:H,rot:180}));bot.forEach((p,c)=>cells.push({page:p,x:c*W,y:H,w:W,h:H,rot:0}));
   out.push({orient:'l',label:'דף יחיד',cells});return out;}
+ if(lay()=='loop'){const W=52.5,H=74.25,cells=[];LOOP[rtl()?'rtl':'ltr'].forEach((row,r)=>row.forEach(([pg,rot],c)=>cells.push({page:pg,x:c*W,y:r*H,w:W,h:H,rot})));out.push({orient:'p',label:'דף יחיד',cells,loop:true});return out;}
  if(lay()=='octavo'){const W=297/4,H=105,t=OCT[rtl()?'rtl':'ltr'];
   for(const side of ['front','back']){let cells=[];t[side].forEach((row,r)=>row.forEach(([pg,rot],c)=>cells.push({page:pg,x:c*W,y:r*H,w:W,h:H,rot})));
    if(side=='back'&&$('flip').value=='long')cells.forEach(c=>{c.x=297-c.x-W;c.y=210-c.y-H;c.rot=(c.rot+180)%360;});
@@ -675,6 +677,7 @@ function drawGuides(doc,sh){const W=sh.orient=='l'?297:210,H=sh.orient=='l'?210:
  doc.setDrawColor(190);doc.setLineWidth(0.15);doc.setLineDashPattern(($('gstyle').value=='dashed')?[1.5,1.5]:[],0);
  const L=(x1,y1,x2,y2)=>doc.line(x1,y1,x2,y2);
  if(P.mode==8){[74.25,148.5,222.75].forEach(x=>L(x,0,x,H));L(0,105,297,105);}
+ else if(sh.loop){[52.5,105,157.5].forEach(x=>L(x,0,x,H));[74.25,148.5,222.75].forEach(y=>L(0,y,210,y));}
  else if(sh.oct){[74.25,148.5,222.75].forEach(x=>L(x,0,x,H));L(0,105,297,105);}
  else if(sh.one16){[52.5,105,157.5].forEach(x=>L(x,0,x,H));[74.25,148.5,222.75].forEach(y=>L(0,y,210,y));}
  else{L(105,0,105,H);L(0,148.5,210,148.5);}
@@ -693,7 +696,7 @@ $('pdf').onclick=async()=>{status('מייצר PDF…');(await makePrintPDF2()).s
 $('pdfr').onclick=async()=>{status('מייצר PDF…');(await makeReadingPDF()).save('zine-reading-'+P.mode+'.pdf');status('PDF מוכן');};
 $('dir').onchange=e=>{unlinkAll();P.dir=e.target.value;help();refreshAll();};$('lay16').onchange=e=>{unlinkAll();P.layout16=e.target.value;help();refreshAll();};
 // ---------- help ----------
-function help(){$('flipL').style.display=P.mode==16&&lay()!='one'?'':'none';$('lay16L').style.display=P.mode==16?'':'none';
+function help(){$('flipL').style.display=P.mode==16&&lay()!='one'&&lay()!='loop'?'':'none';$('lay16L').style.display=P.mode==16?'':'none';
  $('help').innerHTML='<button style="float:left" onclick="document.getElementById(\'helpModal\').classList.remove(\'on\')">✕</button>'+(P.mode==8?`<h2>הוראות קיפול – זין 8 עמודים (חיתוך אחד)</h2><ol>
 <li>קווי העזר: כולם קווי קיפול, חוץ מהקטע האופקי האמצעי בשני המלבנים המרכזיים – שם גוזרים.</li><li>הדפיסו את ה-PDF על דף A4 בגודל 100% ("גודל בפועל", ללא התאמה לדף), לרוחב, צד אחד בלבד.</li>
 <li>קפלו את הדף לאורכו (קיפול "המבורגר" ארוך) כך שהשורה העליונה (ההפוכה) נפגשת עם התחתונה, וקפלו בחזרה – זהו הקו האופקי האמצעי.</li>
@@ -703,6 +706,13 @@ function help(){$('flipL').style.display=P.mode==16&&lay()!='one'?'':'none';$('l
 <p>סידור הדף (משמאל לימין) – ${rtl()?'שורה עליונה הפוכה: 1,2,3,4 | שורה תחתונה: כריכה, אחורית, 6, 5. הזין נפתח מימין לשמאל.':'שורה עליונה הפוכה: 4,3,2,1 | שורה תחתונה: 5, 6, אחורית, כריכה.'}</p>`
  
 
+ :lay()=='loop'?`<h2>הוראות – זין 16 עמודים מדף A4 אחד, חד-צדדי (4×4 עם חריצים)</h2><svg viewBox="-4 -4 218 305" width="170" style="float:left;margin:0 0 8px 12px;background:#fff"><g stroke="#bbb" stroke-width="1" stroke-dasharray="3 3" fill="none"><rect x="0" y="0" width="210" height="297" stroke-dasharray="0" stroke="#888"/><path d="M52.5 0V297M105 0V297M157.5 0V297M0 74.25H210M0 148.5H210M0 222.75H210"/></g><g stroke="#d33" stroke-width="3"><path d="M0 148.5H52.5M157.5 148.5H210M52.5 74.25H157.5M52.5 222.75H157.5M105 74.25V222.75"/></g><g font-size="14" fill="#555" text-anchor="middle" font-family="Rubik">${rtl()?'<text x="131" y="270">1</text><text x="183" y="270">16</text>':'<text x="79" y="270">1</text><text x="26" y="270">16</text>'}</g></svg><ol>
+<li>הדפיסו את ה-PDF (עמוד אחד) על A4 לאורך, 100% גודל בפועל, צד אחד בלבד. שורות 1 ו-3 מודפסות הפוכות – זה מכוון.</li>
+<li>קפלו את הדף לרשת של 4×4 מלבנים (חצי, ועוד חצי – לאורך ולרוחב) וחזרו ופתחו. כל הקווים הם קווי קיפול, חוץ מהחריצים האדומים בשרטוט.</li>
+<li>גזרו 5 חריצים (באדום בשרטוט): בקו האופקי האמצעי – מהשוליים פנימה רק דרך המלבן החיצוני בכל צד (שמאל וימין), כך ששני המלבנים הפנימיים נשארים מחוברים; בקווים האופקיים שמעליו ומתחתיו – רק לאורך שני המלבנים הפנימיים; ובקו האנכי האמצעי – רק לאורך שתי השורות האמצעיות.</li>
+<li>עכשיו הדף הוא "טבעת" אחת של 16 מלבנים. קפלו אותו כמו אקורדיון לאורך הטבעת: כל זוג עמודים סמוכים (1–2, 3–4 …) נצמד גב אל גב, וכל מלבן נקפל על שכנו.</li>
+<li>אספו את הכול לערימה כשהכריכה (עמוד 1) בחוץ ועמוד 16 (כריכה אחורית) מאחוריה, השדרה ${rtl()?'מימין – הזין נפתח מימין לשמאל':'משמאל'}. לחצו היטב על הקפלים.</li></ol>
+<p style="clear:both">הסידור אומת בסימולציה קומבינטורית של הטבעת (אותו מודל משחזר במדויק את תבנית ה-8 עמודים הסטנדרטית). אם משהו לא מסתדר בקיפול הראשון – נסו קודם על דף טיוטה עם המספרים.</p>`
  :lay()=='octavo'?`<h2>הוראות – זין 16 עמודים מדף A4 אחד, בלי גזירה (קיפול ×3)</h2><ol>
 <li>הדפיסו את ה-PDF (2 עמודים) דו-צדדי על דף A4 אחד, לרוחב, 100% גודל בפועל, עם <b>היפוך בצד הקצר</b> (אם הצד השני יוצא הפוך – הדפיסו שוב עם "היפוך בצד הארוך" ושנו גם כאן את ההגדרה ב-⚙️).</li>
 <li>הניחו את הדף לרוחב כשהצד שבו מודפסת <b>הכריכה</b> פונה <b>למטה</b>.</li>
