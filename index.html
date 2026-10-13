@@ -40,14 +40,15 @@ textarea{width:100%;font-family:inherit;direction:rtl}
 <header><h1>✂️ יוצר זינים</h1>
 <select id="mode" title="מצב"><option value="8">8 עמ׳ (A4 אחד)</option><option value="16">16 עמ׳ (2×A4 דו-צדדי)</option></select>
 <button id="bulk">העלאה מרובה</button>
-<button id="pdf" class="pri">PDF להדפסה</button>
+<button id="pdf" class="pri" title="דפי הדפסה A4 מסודרים לקיפול">🖨 PDF להדפסה</button>
 <button id="helpBtn">❓ הוראות קיפול</button>
 <details class="menu"><summary>⚙️ עוד</summary><div class="pop">
 <label>כיוון קריאה: <select id="dir"><option value="rtl">עברית (שדרה מימין)</option><option value="ltr">לועזית (שדרה משמאל)</option></select></label>
+<label id="lay16L">פריסה: <select id="lay16"><option value="one">דף אחד, חד-צדדי</option><option value="booklet">חוברת מהודקת – 2 דפי A4 דו-צדדי</option></select></label>
 <label id="flipL">דו-צדדי: <select id="flip"><option value="short">היפוך בצד הקצר</option><option value="long">היפוך בצד הארוך</option></select></label>
 <label><input type="checkbox" id="guides" checked> קווי קיפול/חיתוך</label>
 <label><input type="checkbox" id="safe"> סימון שוליים בטוחים בהדפסה</label>
-<button id="pdfr">PDF סדר קריאה</button>
+<button id="pdfr">👁 תצוגה מקדימה בסדר קריאה (לא להדפסה)</button>
 <button id="save">שמירה</button><button id="exp">ייצוא פרויקט (JSON)</button><button id="imp">ייבוא פרויקט</button>
 </div></details>
 <span id="status"></span>
@@ -486,7 +487,7 @@ const imgCache=new Map();
 function getImg(src){if(!imgCache.has(src)){const i=new Image();i.src=src;i.onload=()=>refreshAll();imgCache.set(src,i);}return imgCache.get(src);}
 function label(i){const n=+P.mode;return i==0?'כריכה':i==n-1?'כריכה אחורית':'עמוד '+i;}
 // page size in mm
-function pageMM(){return P.mode==8?[297/4,210/2]:[297/4,210/2];}
+function pageMM(){return P.mode==8?[297/4,105]:lay()=='one'?[52.5,74.25]:[105,148.5];}
 // ---------- rendering (aspect = page w/h) ----------
 function drawPage(ctx,pg,W,H,opts={}){
  ctx.save();ctx.fillStyle=pg.bg||'#fff';ctx.fillRect(0,0,W,H);
@@ -554,36 +555,36 @@ $('save').onclick=()=>dbPut(JSON.stringify(P)).then(()=>{try{localStorage.setIte
 function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();}
 $('exp').onclick=()=>download(new Blob([JSON.stringify(P)],{type:'application/json'}),'zine-project.json');
 $('imp').onclick=()=>$('impf').click();$('impf').onchange=async e=>{const f=e.target.files[0];if(!f)return;setProject(JSON.parse(await f.text()));e.target.value='';};
-function setProject(p){P=p;ensure();cur=0;curT=-1;$('mode').value=P.mode;help();refreshAll();}
+function setProject(p){P=p;ensure();cur=0;curT=-1;$('mode').value=P.mode;$('dir').value=P.dir||'rtl';$('lay16').value=P.layout16||'one';help();refreshAll();}
 // ---------- imposition ----------
 // returns sheets: [{side:'front'|'back', cells:[{page, x,y,w,h (mm), rot}]}]; A4 landscape for 8, A4 portrait for 16
+function rtl(){return (P.dir||$('dir').value)=='rtl';}
+function lay(){return P.mode==16?(P.layout16||'one'):'one';}
 function impose(){const out=[];
- if(P.mode==8){const W=297/4,H=105;const top=[4,3,2,1],bot=[5,6,7,0]; // 0-based reading index: 0=cover..7=back
+ if(P.mode==8){const W=297/4,H=105;let top=[4,3,2,1],bot=[5,6,7,0];if(rtl()){top.reverse();bot.reverse();} // 0-based reading index: 0=cover..7=back
   const cells=[];top.forEach((p,c)=>cells.push({page:p,x:c*W,y:0,w:W,h:H,rot:180}));bot.forEach((p,c)=>cells.push({page:p,x:c*W,y:H,w:W,h:H,rot:0}));
   out.push({orient:'l',label:'דף יחיד',cells});return out;}
+ if(lay()=='one'){const W=52.5,H=74.25,cells=[];const halves=[[0,1,2,3,12,13,14,15],[4,5,6,7,8,9,10,11]];
+  halves.forEach((z,hh)=>{let top=[4,3,2,1],bot=[5,6,7,0];if(rtl()){top.reverse();bot.reverse();}
+   top.forEach((p,c)=>cells.push({page:z[p],x:c*W,y:hh*2*H,w:W,h:H,rot:180}));bot.forEach((p,c)=>cells.push({page:z[p],x:c*W,y:(hh*2+1)*H,w:W,h:H,rot:0}));});
+  out.push({orient:'p',label:'דף יחיד',cells,one16:true});return out;}
  // 16: saddle-stitched booklet of 4 nested A5 folios, two folios ganged per A4 portrait sheet
  const N=16,W=105,H=148.5;
  const folio=k=>({front:[N-2*k,1+2*k],back:[2+2*k,N-1-2*k]}); // 1-based page numbers [left,right]
  for(let s=0;s<2;s++){for(const side of['front','back']){const cells=[];
-   [2*s,2*s+1].forEach((k,row)=>{folio(k)[side].forEach((pn,col)=>cells.push({page:pn-1,x:col*W,y:row*H,w:W,h:H,rot:0}));});
+   [2*s,2*s+1].forEach((k,row)=>{(rtl()?folio(k)[side].slice().reverse():folio(k)[side]).forEach((pn,col)=>cells.push({page:pn-1,x:col*W,y:row*H,w:W,h:H,rot:0}));});
    let rotSheet=side=='back'&&$('flip').value=='short';
    if(rotSheet)cells.forEach(c=>{c.x=210-c.x-c.w;c.y=297-c.y-c.h;c.rot=180;});
    out.push({orient:'p',label:'דף '+(s+1)+' '+(side=='front'?'חזית':'גב'),cells});}}
  return out;}
 function drawGuides(doc,sh){doc.setLineWidth(0.2);
+ if(sh.one16){doc.setDrawColor(150);doc.setLineDashPattern([2,2],0);for(let c=1;c<4;c++)doc.line(c*52.5,0,c*52.5,297);[74.25,222.75].forEach(y=>{doc.line(0,y,52.5,y);doc.line(157.5,y,210,y);});
+  doc.setDrawColor(220,0,0);doc.setLineDashPattern([],0);doc.setLineWidth(0.5);doc.line(0,148.5,210,148.5);[74.25,222.75].forEach(y=>doc.line(52.5,y,157.5,y));doc.setLineDashPattern([],0);return;}
  if(P.mode==8){doc.setDrawColor(150);doc.setLineDashPattern([2,2],0);for(let c=1;c<4;c++)doc.line(c*74.25,0,c*74.25,210);doc.line(0,105,74.25,105);doc.line(222.75,105,297,105);
   doc.setDrawColor(220,0,0);doc.setLineDashPattern([],0);doc.setLineWidth(0.5);doc.line(74.25,105,222.75,105);}
  else{doc.setDrawColor(220,0,0);doc.setLineDashPattern([],0);doc.setLineWidth(0.4);doc.line(0,148.5,210,148.5);doc.setDrawColor(150);doc.setLineDashPattern([2,2],0);doc.setLineWidth(0.2);doc.line(105,0,105,297);}
  doc.setLineDashPattern([],0);}
 async function waitImgs(){await document.fonts.ready;for(const im of imgCache.values())if(!im.complete)await new Promise(r=>{im.onload=im.onerror=r;});}
-async function makePrintPDF(){await waitImgs();const {jsPDF}=window.jspdf;let doc;
- for(const sh of impose()){if(!doc)doc=new jsPDF({orientation:sh.orient=='l'?'landscape':'portrait',unit:'mm',format:'a4'});else doc.addPage('a4',sh.orient=='l'?'landscape':'portrait');
-  for(const c of sh.cells){const cv=pageCanvas(c.page,Math.round(c.w*MM),Math.round(c.h*MM),{safe:$('safe').checked});
-   const url=cv.toDataURL('image/jpeg',0.92);doc.addImage(url,'JPEG',c.x,c.y,c.w,c.h,undefined,'FAST',c.rot);}
-  if($('guides').checked)drawGuides(doc,sh);}
- return doc;}
-// jsPDF addImage rotation is about the image's top-left corner(counter-clockwise); for 180° we pre-rotate canvas instead
-const _orig=null;
 async function makePrintPDF2(){await waitImgs();const {jsPDF}=window.jspdf;let doc;
  for(const sh of impose()){const o=sh.orient=='l'?'landscape':'portrait';if(!doc)doc=new jsPDF({orientation:o,unit:'mm',format:'a4'});else doc.addPage('a4',o);
   for(const c of sh.cells){const W=Math.round(c.w*MM),H=Math.round(c.h*MM);let cv=pageCanvas(c.page,W,H,{safe:$('safe').checked});
@@ -595,22 +596,30 @@ async function makeReadingPDF(){await waitImgs();const {jsPDF}=window.jspdf;cons
  P.pages.forEach((p,i)=>{if(i)doc.addPage([w,h],'portrait');doc.addImage(pageCanvas(i,Math.round(w*MM),Math.round(h*MM)).toDataURL('image/jpeg',0.92),'JPEG',0,0,w,h,undefined,'FAST');});return doc;}
 $('pdf').onclick=async()=>{status('מייצר PDF…');(await makePrintPDF2()).save('zine-print-'+P.mode+'.pdf');status('PDF מוכן');};
 $('pdfr').onclick=async()=>{status('מייצר PDF…');(await makeReadingPDF()).save('zine-reading-'+P.mode+'.pdf');status('PDF מוכן');};
-$('flip').onchange=()=>{};
+$('dir').onchange=e=>{P.dir=e.target.value;help();refreshAll();};$('lay16').onchange=e=>{P.layout16=e.target.value;help();refreshAll();};
 // ---------- help ----------
-function help(){$('flipL').style.display=P.mode==16?'':'none';
+function help(){$('flipL').style.display=P.mode==16&&lay()=='booklet'?'':'none';$('lay16L').style.display=P.mode==16?'':'none';
  $('help').innerHTML='<button style="float:left" onclick="document.getElementById(\'helpModal\').classList.remove(\'on\')">✕</button>'+(P.mode==8?`<h2>הוראות קיפול – זין 8 עמודים (חיתוך אחד)</h2><ol>
 <li>הדפיסו את ה-PDF על דף A4 בגודל 100% ("גודל בפועל", ללא התאמה לדף), לרוחב, צד אחד בלבד.</li>
 <li>קפלו את הדף לאורכו (קיפול "המבורגר" ארוך) כך שהשורה העליונה (ההפוכה) נפגשת עם התחתונה, וקפלו בחזרה – זהו הקו האופקי האמצעי.</li>
 <li>קפלו את הדף לחצי לרוחב ואז כל חצי שוב לחצי, כך שנוצרים 8 מלבנים. פתחו.</li>
 <li>קפלו שוב לאורך (הצד המודפס כלפי חוץ) וגזרו לאורך הקו האדום בלבד – רק בשני המלבנים האמצעיים, מהקיפול פנימה.</li>
 <li>פתחו, קפלו שוב לאורך ודחפו את הקצוות פנימה כך שהחור נפתח ליהלום ואז לצורת "+". קפלו את הדפים סביב עד שהכריכה מבחוץ.</li></ol>
-<p>סידור הדף (שורה עליונה הפוכה 180°, משמאל לימין): 4,3,2,1 | שורה תחתונה: 5,6,אחורית,כריכה.</p>`
+<p>סידור הדף (משמאל לימין) – ${rtl()?'שורה עליונה הפוכה: 1,2,3,4 | שורה תחתונה: כריכה, אחורית, 6, 5. הזין נפתח מימין לשמאל.':'שורה עליונה הפוכה: 4,3,2,1 | שורה תחתונה: 5, 6, אחורית, כריכה.'}</p>`
+ 
+
+ :lay()=='one'?`<h2>הוראות – זין 16 עמודים מדף A4 אחד (חד-צדדי, עמודי A7)</h2><ol>
+<li>הדפיסו את ה-PDF (עמוד אחד) על A4 לאורך, 100% גודל בפועל, צד אחד.</li>
+<li>גזרו את הדף לשניים לאורך הקו האדום האופקי באמצע. מתקבלים שני חצאים – כל אחד הוא זין "חיתוך אחד" של 8 עמודים: החצי העליון = עמודים חיצוניים (כריכה,1–3,12–14,אחורית), החצי התחתון = עמודים 4–11.</li>
+<li>בכל חצי: קפלו ל-8 מלבנים, קפלו לאורך כשההדפסה בחוץ, גזרו את הקו האדום הקצר במרכז, פתחו ודחפו לצורת "+", וקפלו עד שהכריכה של אותו חצי בחוץ.</li>
+<li>פתחו את הזין של החצי העליון לאמצע (בין עמוד 3 ל-12) והכניסו לתוכו את הזין של החצי התחתון (שהעמוד הראשון שלו הוא 4). קבעו בסיכה אחת או שתיים בשדרה, או בנקודת דבק.</li></ol>
+<p>שימו לב: לפעמים שורה עליונה בכל חצי מודפסת הפוכה – זה מכוון.</p>`
  :`<h2>הוראות – זין 16 עמודים (חוברת תפורה/מהודקת, A6)</h2><ol>
 <li>הדפיסו דו-צדדי על 2 דפי A4 לאורך, בגודל 100%. בחרו בחלון ההדפסה אותו סוג היפוך שנבחר כאן (מומלץ: <b>היפוך בצד הקצר</b>). דף 1 = עמודים 1–2 ב-PDF, דף 2 = עמודים 3–4.</li>
 <li>גזרו כל דף A4 לאורך הקו האדום האופקי – מתקבלות 4 רצועות A5 (כל אחת עם 2 עמודים בכל צד).</li>
 <li>סדרו את הרצועות זו בתוך זו: העליונה מדף 1 בחוץ, אחריה התחתונה מדף 1, אחריה העליונה מדף 2, והתחתונה מדף 2 במרכז. הצד עם הכריכה פונה החוצה.</li>
-<li>קפלו את הערימה באמצע (הקו האפור האנכי) והדקו 2 סיכות בקיפול (או תפרו). הכריכה מימין לקיפול כשהצד הפתוח משמאל? לא – זין עברי נפתח ימינה: הכריכה בחלק הימני של הרצועה החיצונית, קוראים מימין לשמאל... ראו הערה.</li></ol>
-<p>הערה: הסידור הוא הסידור התקני לחוברת (עמודים 16|1, 2|15 …). בחוברת שמשמאל לימין הכריכה (עמוד 1) נמצאת מימין לקיפול. לזין עברי שנפתח מימין לשמאל – פשוט סובבו את החוברת: החוברת זהה, הקיפול בצד ימין.</p>`);}
+<li>קפלו את הערימה באמצע (הקו האפור האנכי) כשהכריכה בחוץ, והדקו 2 סיכות בקיפול. ${rtl()?'החוברת נפתחת מימין לשמאל (שדרה מימין).':'חוברת שנפתחת משמאל לימין.'}</li></ol>
+<p>סידור חוברת תקני של 4 גיליונות A5 מקוננים, שניים על כל A4: 16|1 ובגבו 2|15, 14|3 / 4|13 וכו׳. בהיפוך בצד הקצר הגב מודפס הפוך 180° – זה תקין.</p>`);}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button,.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');$(b.dataset.t).classList.add('on');});
 $('helpBtn').onclick=()=>{help();$('helpModal').classList.add('on');};$('helpModal').onclick=e=>{if(e.target.id=='helpModal')$('helpModal').classList.remove('on');};
 document.addEventListener('keydown',e=>{if(e.key=='Escape')$('helpModal').classList.remove('on');});
