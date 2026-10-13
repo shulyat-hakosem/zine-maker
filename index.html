@@ -40,7 +40,7 @@ textarea{width:100%;font-family:inherit;direction:rtl}
 </style></head><body>
 <header><h1>✂️ יוצר זינים</h1>
 <select id="mode" title="מצב"><option value="8">8 עמ׳ (A4 אחד)</option><option value="16">16 עמ׳ (2×A4 דו-צדדי)</option></select>
-<button id="bulk">העלאה מרובה</button>
+<button id="bulk" title="תמונה אחת לכל עמוד, לפי סדר שמות הקבצים">מילוי עמודים מתמונות…</button>
 <button id="pdf" class="pri" title="דפי הדפסה A4 מסודרים לקיפול">🖨 PDF להדפסה</button>
 <label title="קווי עזר אפורים דקים לקיפול ולגזירה"><input type="checkbox" id="guides" checked> קווי עזר</label>
 <button id="helpBtn">❓ הוראות קיפול</button>
@@ -54,18 +54,20 @@ textarea{width:100%;font-family:inherit;direction:rtl}
 <button id="save">שמירה</button><button id="exp">ייצוא פרויקט (JSON)</button><button id="imp">ייבוא פרויקט</button>
 </div></details>
 <span id="status"></span>
-<input type="file" id="bulkf" accept="image/*" multiple hidden><input type="file" id="impf" accept=".json" hidden><input type="file" id="onef" accept="image/*" hidden>
+<input type="file" id="bulkf" accept="image/*" multiple hidden><input type="file" id="impf" accept=".json" hidden><input type="file" id="onef" accept="image/*" hidden><input type="file" id="layf" accept="image/*" multiple hidden>
 </header>
 <main>
 <div id="gridWrap"><div id="grid"></div></div>
 <div id="edWrap"><b id="edTitle"></b><div id="edBox"><canvas id="ed"></canvas></div></div>
 <div id="panel">
 <div class="row"><button id="linkSp" style="flex:1"></button></div>
-<div class="row"><button id="dupP" title="הוספת עותק אחרי העמוד הנוכחי">＋ שכפול</button><button id="copyP" title="Ctrl+C">העתקת עמוד</button><button id="pasteP" title="Ctrl+V">הדבקה</button></div>
+<div class="row"><button id="dupP" title="הוספת עותק אחרי העמוד הנוכחי">＋ שכפול</button><button id="copyP" title="Ctrl+C">העתקת עמוד</button><button id="pasteP">הדבקת עמוד</button></div>
 <div class="row">גרירה: <label><input type="radio" name="dm" value="img" checked>תמונה</label><label><input type="radio" name="dm" value="txt">טקסט</label><label><input type="radio" name="dm" value="el">אלמנט</label></div>
 <div class="tabs"><button data-t="tImg" class="on">תמונה</button><button data-t="tTxt">טקסט</button><button data-t="tCol">קולאז׳</button><button data-t="tBg">רקע</button></div>
 <div class="tab on" id="tImg">
-<div class="row"><button id="up">העלאת תמונה</button><button id="delImg">הסרה</button></div>
+<div class="row"><button id="addImg" style="flex:1;font-weight:bold">+ הוסף תמונה (שכבה)</button></div>
+<small>אפשר לבחור כמה קבצים, לגרור כמה קבצים לעמוד, או להדביק תמונה (Ctrl+V). כל תמונה היא שכבה – גוררים, מגדילים ומסובבים בלשונית קולאז׳/שכבות.</small>
+<div class="row">תמונת רקע של העמוד: <button id="up">החלפה</button><button id="delImg">הסרה</button></div>
 <div class="row"><button id="fit">התאמה</button><button id="fill">מילוי</button><button id="rotL">↺90°</button><button id="rotR">↻90°</button></div>
 <div class="row">זום <input type="range" id="zoom" min="0.05" max="5" step="0.01"></div>
 <div class="row">סיבוב <input type="range" id="rot" min="-180" max="180" step="1"></div>
@@ -84,6 +86,7 @@ textarea{width:100%;font-family:inherit;direction:rtl}
 <div class="row"><button id="elRand" style="flex:1">אקראי 🎲</button></div>
 <div class="row"><button data-add="sticky">פתק</button><button data-add="strip">רצועה</button><button data-add="washi">וואשי</button><button data-add="masking">נייר דבק</button><button data-add="texture">טקסטורה</button></div>
 <div class="row"><select id="esel" style="flex:1"></select></div>
+<div class="row"><button id="copyL">העתק שכבה</button><button id="pasteL">הדבק שכבה</button></div>
 <div class="row"><button id="eDel" style="background:#c33;color:#fff;border-color:#c33;flex:1">🗑 מחק אלמנט</button><button id="eClear">🧹 נקה קולאז׳ מהעמוד</button></div>
 <div class="row">גודל <input type="range" id="eSize" min="0.1" max="3" step="0.01"></div>
 <div class="row">סיבוב <input type="range" id="eRot" min="-180" max="180" step="1"></div>
@@ -531,6 +534,7 @@ function tornPath(ctx,w,h,r,ends,u){const L=-w/2,Rr=w/2,T=-h/2,B=h/2,n=Math.max(
 function shade(ctx,u){ctx.shadowColor='rgba(0,0,0,.25)';ctx.shadowBlur=6*u;ctx.shadowOffsetY=2*u;}
 const PAL={sticky:['#fff176','#ffab91','#81d4fa','#a5d6a7','#f48fb1','#ffcc80'],washi:['#f8bbd0','#b2dfdb','#ffe082','#c5cae9','#ffccbc','#dcedc8','#d1c4e9'],strip:['#f5f0e1','#e8dcc0','#d9c7a3','#fafafa','#efe6d2']};
 const EL={
+ image(ctx,w,h,r,e,u){const im=getImg(e.src);if(im.complete&&im.naturalWidth)ctx.drawImage(im,-w/2,-h/2,w,h);},
  sticky(ctx,w,h,r,e,u){ctx.save();shade(ctx,u);ctx.fillStyle=e.color;ctx.fillRect(-w/2,-h/2,w,h);ctx.restore();
   const g=ctx.createLinearGradient(0,-h/2,0,h/2);g.addColorStop(0,'rgba(0,0,0,.08)');g.addColorStop(.15,'rgba(0,0,0,0)');g.addColorStop(.85,'rgba(255,255,255,0)');g.addColorStop(1,'rgba(0,0,0,.10)');ctx.fillStyle=g;ctx.fillRect(-w/2,-h/2,w,h);},
  strip(ctx,w,h,r,e,u){ctx.save();shade(ctx,u);tornPath(ctx,w,h,r,'torn',u);ctx.fillStyle=e.color;ctx.fill();ctx.restore();ctx.save();tornPath(ctx,w,h,rng(e.seed),'torn',u);ctx.clip();
@@ -552,7 +556,7 @@ const EL={
   else if(t=='stains'){for(let k=0;k<5;k++){const x=(r()-.5)*w*.8,y=(r()-.5)*h*.8,R=u*(40+r()*120);if(r()<.5){ctx.strokeStyle='rgba(120,70,20,.22)';ctx.lineWidth=u*(3+r()*5);ctx.beginPath();ctx.ellipse(x,y,R,R*(.85+r()*.2),r()*3,0,7);ctx.stroke();}
     else{const g=ctx.createRadialGradient(x,y,0,x,y,R);g.addColorStop(0,'rgba(140,90,30,.18)');g.addColorStop(.8,'rgba(140,90,30,.10)');g.addColorStop(1,'rgba(140,90,30,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,R,0,7);ctx.fill();}}}
   ctx.restore();}};
-const ELNAMES={sticky:'פתק דביק',strip:'רצועת נייר',washi:'וואשי',masking:'נייר דבק',texture:'טקסטורה'};
+const ELNAMES={image:'תמונה',sticky:'פתק דביק',strip:'רצועת נייר',washi:'וואשי',masking:'נייר דבק',texture:'טקסטורה'};
 const TEXN={grain:'גרעין נייר',halftone:'הלפטון',scratches:'שריטות',stains:'כתמים',noise:'רעש'};
 function newEl(type,r){const pick=a=>a[Math.floor(r()*a.length)];const seed=Math.floor(r()*1e9);const [w,h]=mmOf(T());const asp=h/w;
  const edge=()=>{const v=r()<.5?r()*.18:1-r()*.18;return v;};let x,y;const q=r();if(q<.5){x=edge();y=edge();}else if(q<.75){x=edge();y=.15+r()*.7;}else{x=.15+r()*.7;y=edge();}
@@ -614,7 +618,7 @@ ed.onpointermove=e=>{if(!drag)return;const dx=(e.offsetX-drag.x)/ed.clientWidth,
  const m=document.querySelector('[name=dm]:checked').value;if(m=='el'&&E()){E().x+=dx;E().y+=dy;}else if(m=='txt'&&pg.texts[curT]){pg.texts[curT].x+=dx;pg.texts[curT].y+=dy;}else if(pg.img){pg.img.x+=dx;pg.img.y+=dy;}refreshEditor();};
 ed.onpointerup=()=>{drag=null;refreshAll();};
 ed.onwheel=e=>{const pg=T();if(!pg.img)return;e.preventDefault();pg.img.scale*=e.deltaY<0?1.05:1/1.05;refreshAll();};
-ed.ondragover=e=>e.preventDefault();ed.ondrop=e=>{e.preventDefault();loadFiles([...e.dataTransfer.files],cur);};
+ed.ondragover=e=>e.preventDefault();ed.ondrop=e=>{e.preventDefault();addImageFiles([...e.dataTransfer.files]);};
 $('up').onclick=()=>$('onef').click();$('onef').onchange=e=>{loadFiles([...e.target.files],cur);e.target.value='';};
 $('bulk').onclick=()=>$('bulkf').click();$('bulkf').onchange=e=>{loadFiles([...e.target.files],0);e.target.value='';};
 $('fit').onclick=()=>{const p=T();if(p.img){fitImg(p,'fit');refreshAll();}};$('fill').onclick=()=>{const p=T();if(p.img){fitImg(p,'fill');refreshAll();}};
@@ -732,11 +736,10 @@ function pastePage(){if(!pageClip)return;const k=spOf(cur);if(k!=null)P.spreads[
 function dupPage(){const n=N();if(cur>=n-2){status('אין מקום לשכפול אחרי עמוד זה');return;}unlinkAll();const last=P.pages[n-2];
  if((last.img||last.texts.length)&&!confirm('השכפול ידחוף את העמודים קדימה, ותוכן '+label0(n-2)+' יימחק. להמשיך?'))return;
  P.pages.splice(n-2,1);P.pages.splice(cur+1,0,clone(P.pages[cur]));cur++;refreshAll();}
-$('copyP').onclick=copyPage;$('pasteP').onclick=pastePage;$('dupP').onclick=dupPage;
+$('copyP').onclick=()=>{copyPage();lastClip='page';};$('pasteP').onclick=pastePage;$('dupP').onclick=dupPage;
 $('copyT').onclick=()=>{const t=T().texts[curT];if(t){textClip=clone(t);status('התיבה הועתקה');}};
 $('pasteT').onclick=()=>{if(!textClip)return;const pg=T(),t=clone(textClip);t.x=Math.min(.95,t.x+.03);t.y=Math.min(.95,t.y+.03);pg.texts.push(t);curT=pg.texts.length-1;refreshAll();};
-document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey))return;const a=document.activeElement;if(a&&(a.tagName=='TEXTAREA'||(a.tagName=='INPUT'&&/text|number/.test(a.type))))return;
- const k=e.key.toLowerCase();if(k=='c'||k=='ג'){copyPage();e.preventDefault();}else if(k=='v'||k=='ה'){pastePage();e.preventDefault();}});
+
 function E(){const pg=T();return (pg.els||[])[curE];}
 function refreshElUI(pg){const els=pg.els||[];renderLayers(pg);if(curE>=els.length)curE=els.length-1;const s=$('esel');s.innerHTML='';els.forEach((e,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+': '+ELNAMES[e.type]+(e.type=='texture'?' – '+TEXN[e.pat]:'');s.appendChild(o);});s.value=curE;
  const e=els[curE];$('eDel').style.display=e?'':'none';$('eClear').style.display=els.length?'':'none';if(!e)return;$('eSize').value=e.sc||1;$('eRot').value=e.rot;$('eOp').value=e.op;$('eColor').value=e.color||'#000000';
@@ -762,14 +765,37 @@ function moveEl(i,how){const pg=T();const q=seq(pg);const p=q.indexOf(i);if(p<0)
 $('eTop').onclick=()=>{if(E())moveEl(curE,'top');};$('eFront').onclick=()=>{if(E())moveEl(curE,'up');};$('eBack').onclick=()=>{if(E())moveEl(curE,'down');};$('eBottom').onclick=()=>{if(E())moveEl(curE,'bottom');};
 function renderLayers(pg){const L=$('layers');const q=seq(pg).slice().reverse();L.innerHTML='';
  q.forEach(x=>{const d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:4px;padding:2px 4px;border-bottom:1px solid #eee';
-  if(x=='IMG'||x=='TXT'){d.style.background='#f0f0f0';d.textContent=x=='IMG'?'🖼 תמונה':'🔤 טקסט';}
+  if(x=='IMG'||x=='TXT'){d.style.background='#f0f0f0';d.textContent=x=='IMG'?'🖼 תמונת רקע':'🔤 טקסט';}
   else{const e=pg.els[x];if(x==curE)d.style.background='#d6f5ec';const n=document.createElement('span');n.style.flex='1';n.style.cursor='pointer';n.textContent=ELNAMES[e.type]+(e.type=='texture'?' – '+TEXN[e.pat]:'');n.onclick=()=>{curE=x;document.querySelector('[name=dm][value=el]').checked=true;refreshAll();};
    const up=document.createElement('button');up.textContent='▲';up.onclick=()=>moveEl(x,'up');const dn=document.createElement('button');dn.textContent='▼';dn.onclick=()=>moveEl(x,'down');
    [up,dn].forEach(b=>b.style.padding='0 5px');d.append(n,up,dn);d.draggable=true;d.ondragstart=ev=>ev.dataTransfer.setData('text/plain',x);}
   d.ondragover=ev=>ev.preventDefault();d.ondrop=ev=>{ev.preventDefault();const from=+ev.dataTransfer.getData('text/plain');const pg=T();const q2=seq(pg);q2.splice(q2.indexOf(from),1);let t=q2.indexOf(x);q2.splice(t+1,0,from);curE=from;applySeq(pg,q2);refreshAll();};
   L.appendChild(d);});
  const bgd=document.createElement('div');bgd.style.cssText='padding:2px 4px;background:#f0f0f0;color:#777';bgd.textContent='▭ רקע';L.appendChild(bgd);}
+async function addImageSrc(src){const im=getImg(src);if(!im.complete)await new Promise(r=>{im.addEventListener('load',r,{once:true});im.addEventListener('error',r,{once:true});});
+ const pg=T();pg.els=pg.els||[];const [w,h]=mmOf(pg);const n=pg.els.filter(e=>e.type=='image').length;
+ let ew=.6,eh=ew*(im.naturalHeight||1)/(im.naturalWidth||1);const maxh=.8*h/w;if(eh>maxh){ew*=maxh/eh;eh=maxh;}
+ pg.els.push({type:'image',src,seed:0,x:.5+((n%4)-1.5)*.04,y:.5+((n%4)-1.5)*.04,w:ew,h:eh,rot:0,op:1,z:'above'});curE=pg.els.length-1;
+ document.querySelector('[name=dm][value=el]').checked=true;refreshAll();}
+async function addImageFiles(files){for(const f of files.filter(f=>f.type.startsWith('image/')))await addImageSrc(await readFile(f));status('נוספו שכבות תמונה');}
+$('addImg').onclick=()=>$('layf').click();$('layf').onchange=e=>{addImageFiles([...e.target.files]);e.target.value='';};
+// layer clipboard
+let layerClip=null,lastClip='page';
+function copyLayer(){const pg=T();const e=(pg.els||[])[curE];if(e){layerClip={kind:'el',v:clone(e)};lastClip='layer';status('השכבה הועתקה');return true;}
+ if($('tTxt').classList.contains('on')&&pg.texts[curT]){layerClip={kind:'txt',v:clone(pg.texts[curT])};textClip=clone(pg.texts[curT]);lastClip='layer';status('תיבת הטקסט הועתקה');return true;}return false;}
+function pasteLayer(){if(!layerClip)return;const pg=T();const v=clone(layerClip.v);v.x=Math.min(.97,v.x+.03);v.y=Math.min(.97,v.y+.03);
+ if(layerClip.kind=='el'){pg.els=pg.els||[];pg.els.push(v);curE=pg.els.length-1;document.querySelector('[name=dm][value=el]').checked=true;}else{pg.texts.push(v);curT=pg.texts.length-1;}status('הודבק');refreshAll();}
+function isTyping(){const a=document.activeElement;return a&&(a.tagName=='TEXTAREA'||a.isContentEditable||(a.tagName=='INPUT'&&/text|number|search|url|email/.test(a.type)));}
+document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||isTyping())return;
+ if(e.code=='KeyC'){if(!copyLayer()){copyPage();lastClip='page';}e.preventDefault();}
+ // KeyV: handled in the paste event (so system-clipboard images arrive); no preventDefault here
+});
+document.addEventListener('paste',e=>{if(isTyping())return;const items=[...(e.clipboardData&&e.clipboardData.items||[])];const files=items.filter(i=>i.kind=='file'&&i.type.startsWith('image/')).map(i=>i.getAsFile()).filter(Boolean);
+ e.preventDefault();if(files.length){addImageFiles(files);return;}
+ const html=e.clipboardData&&e.clipboardData.getData('text/html');const m=html&&html.match(/<img[^>]+src="(data:image[^"]+)"/);if(m){addImageSrc(m[1]);return;}
+ if(lastClip=='layer'&&layerClip)pasteLayer();else if(pageClip)pastePage();});
+$('copyL').onclick=()=>{if(!copyLayer())status('בחרו שכבה (אלמנט/תמונה) או תיבת טקסט');};$('pasteL').onclick=pasteLayer;
 // test hook
-window.__zine={newEl,rng,T,linkSpread,get cur(){return cur},set cur(v){cur=v},get P(){return P},setProject,makePrintPDF:makePrintPDF2,makeReadingPDF,impose};
+window.__zine={addImageSrc,newEl,rng,T,linkSpread,get cur(){return cur},set cur(v){cur=v},get P(){return P},setProject,makePrintPDF:makePrintPDF2,makeReadingPDF,impose};
 (async()=>{const s=await dbGet().catch(()=>null);if(s){try{setProject(JSON.parse(s));return;}catch(e){}}P={mode:8,pages:[]};ensure();help();refreshAll();})();
 </script></body></html>
