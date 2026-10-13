@@ -41,12 +41,13 @@ textarea{width:100%;font-family:inherit;direction:rtl}
 <select id="mode" title="מצב"><option value="8">8 עמ׳ (A4 אחד)</option><option value="16">16 עמ׳ (2×A4 דו-צדדי)</option></select>
 <button id="bulk">העלאה מרובה</button>
 <button id="pdf" class="pri" title="דפי הדפסה A4 מסודרים לקיפול">🖨 PDF להדפסה</button>
+<label title="קווי עזר אפורים דקים לקיפול ולגזירה"><input type="checkbox" id="guides" checked> קווי עזר</label>
 <button id="helpBtn">❓ הוראות קיפול</button>
 <details class="menu"><summary>⚙️ עוד</summary><div class="pop">
 <label>כיוון קריאה: <select id="dir"><option value="rtl">עברית (שדרה מימין)</option><option value="ltr">לועזית (שדרה משמאל)</option></select></label>
 <label id="lay16L">פריסה: <select id="lay16"><option value="one">דף אחד, חד-צדדי</option><option value="booklet">חוברת מהודקת – 2 דפי A4 דו-צדדי</option></select></label>
 <label id="flipL">דו-צדדי: <select id="flip"><option value="short">היפוך בצד הקצר</option><option value="long">היפוך בצד הארוך</option></select></label>
-<label><input type="checkbox" id="guides" checked> קווי קיפול/חיתוך</label>
+<label>סגנון קווים: <select id="gstyle"><option value="solid">קו דק רציף</option><option value="dashed">קו מקווקו</option></select></label>
 <label><input type="checkbox" id="safe"> סימון שוליים בטוחים בהדפסה</label>
 <button id="pdfr">👁 תצוגה מקדימה בסדר קריאה (לא להדפסה)</button>
 <button id="save">שמירה</button><button id="exp">ייצוא פרויקט (JSON)</button><button id="imp">ייבוא פרויקט</button>
@@ -577,12 +578,12 @@ function impose(){const out=[];
    if(rotSheet)cells.forEach(c=>{c.x=210-c.x-c.w;c.y=297-c.y-c.h;c.rot=180;});
    out.push({orient:'p',label:'דף '+(s+1)+' '+(side=='front'?'חזית':'גב'),cells});}}
  return out;}
-function drawGuides(doc,sh){doc.setLineWidth(0.2);
- if(sh.one16){doc.setDrawColor(150);doc.setLineDashPattern([2,2],0);for(let c=1;c<4;c++)doc.line(c*52.5,0,c*52.5,297);[74.25,222.75].forEach(y=>{doc.line(0,y,52.5,y);doc.line(157.5,y,210,y);});
-  doc.setDrawColor(220,0,0);doc.setLineDashPattern([],0);doc.setLineWidth(0.5);doc.line(0,148.5,210,148.5);[74.25,222.75].forEach(y=>doc.line(52.5,y,157.5,y));doc.setLineDashPattern([],0);return;}
- if(P.mode==8){doc.setDrawColor(150);doc.setLineDashPattern([2,2],0);for(let c=1;c<4;c++)doc.line(c*74.25,0,c*74.25,210);doc.line(0,105,74.25,105);doc.line(222.75,105,297,105);
-  doc.setDrawColor(220,0,0);doc.setLineDashPattern([],0);doc.setLineWidth(0.5);doc.line(74.25,105,222.75,105);}
- else{doc.setDrawColor(220,0,0);doc.setLineDashPattern([],0);doc.setLineWidth(0.4);doc.line(0,148.5,210,148.5);doc.setDrawColor(150);doc.setLineDashPattern([2,2],0);doc.setLineWidth(0.2);doc.line(105,0,105,297);}
+function drawGuides(doc,sh){const W=sh.orient=='l'?297:210,H=sh.orient=='l'?210:297;
+ doc.setDrawColor(190);doc.setLineWidth(0.15);doc.setLineDashPattern(($('gstyle').value=='dashed')?[1.5,1.5]:[],0);
+ const L=(x1,y1,x2,y2)=>doc.line(x1,y1,x2,y2);
+ if(P.mode==8){[74.25,148.5,222.75].forEach(x=>L(x,0,x,H));L(0,105,297,105);}
+ else if(sh.one16){[52.5,105,157.5].forEach(x=>L(x,0,x,H));[74.25,148.5,222.75].forEach(y=>L(0,y,210,y));}
+ else{L(105,0,105,H);L(0,148.5,210,148.5);}
  doc.setLineDashPattern([],0);}
 async function waitImgs(){await document.fonts.ready;for(const im of imgCache.values())if(!im.complete)await new Promise(r=>{im.onload=im.onerror=r;});}
 async function makePrintPDF2(){await waitImgs();const {jsPDF}=window.jspdf;let doc;
@@ -600,25 +601,25 @@ $('dir').onchange=e=>{P.dir=e.target.value;help();refreshAll();};$('lay16').onch
 // ---------- help ----------
 function help(){$('flipL').style.display=P.mode==16&&lay()=='booklet'?'':'none';$('lay16L').style.display=P.mode==16?'':'none';
  $('help').innerHTML='<button style="float:left" onclick="document.getElementById(\'helpModal\').classList.remove(\'on\')">✕</button>'+(P.mode==8?`<h2>הוראות קיפול – זין 8 עמודים (חיתוך אחד)</h2><ol>
-<li>הדפיסו את ה-PDF על דף A4 בגודל 100% ("גודל בפועל", ללא התאמה לדף), לרוחב, צד אחד בלבד.</li>
+<li>קווי העזר: כולם קווי קיפול, חוץ מהקטע האופקי האמצעי בשני המלבנים המרכזיים – שם גוזרים.</li><li>הדפיסו את ה-PDF על דף A4 בגודל 100% ("גודל בפועל", ללא התאמה לדף), לרוחב, צד אחד בלבד.</li>
 <li>קפלו את הדף לאורכו (קיפול "המבורגר" ארוך) כך שהשורה העליונה (ההפוכה) נפגשת עם התחתונה, וקפלו בחזרה – זהו הקו האופקי האמצעי.</li>
 <li>קפלו את הדף לחצי לרוחב ואז כל חצי שוב לחצי, כך שנוצרים 8 מלבנים. פתחו.</li>
-<li>קפלו שוב לאורך (הצד המודפס כלפי חוץ) וגזרו לאורך הקו האדום בלבד – רק בשני המלבנים האמצעיים, מהקיפול פנימה.</li>
+<li>קפלו שוב לאורך (הצד המודפס כלפי חוץ) וגזרו לאורך הקו האופקי בלבד – רק בשני המלבנים האמצעיים, מהקיפול פנימה.</li>
 <li>פתחו, קפלו שוב לאורך ודחפו את הקצוות פנימה כך שהחור נפתח ליהלום ואז לצורת "+". קפלו את הדפים סביב עד שהכריכה מבחוץ.</li></ol>
 <p>סידור הדף (משמאל לימין) – ${rtl()?'שורה עליונה הפוכה: 1,2,3,4 | שורה תחתונה: כריכה, אחורית, 6, 5. הזין נפתח מימין לשמאל.':'שורה עליונה הפוכה: 4,3,2,1 | שורה תחתונה: 5, 6, אחורית, כריכה.'}</p>`
  
 
  :lay()=='one'?`<h2>הוראות – זין 16 עמודים מדף A4 אחד (חד-צדדי, עמודי A7)</h2><ol>
 <li>הדפיסו את ה-PDF (עמוד אחד) על A4 לאורך, 100% גודל בפועל, צד אחד.</li>
-<li>גזרו את הדף לשניים לאורך הקו האדום האופקי באמצע. מתקבלים שני חצאים – כל אחד הוא זין "חיתוך אחד" של 8 עמודים: החצי העליון = עמודים חיצוניים (כריכה,1–3,12–14,אחורית), החצי התחתון = עמודים 4–11.</li>
-<li>בכל חצי: קפלו ל-8 מלבנים, קפלו לאורך כשההדפסה בחוץ, גזרו את הקו האדום הקצר במרכז, פתחו ודחפו לצורת "+", וקפלו עד שהכריכה של אותו חצי בחוץ.</li>
+<li>גזרו את הדף לשניים לאורך הקו האופקי שבאמצע הדף. מתקבלים שני חצאים – כל אחד הוא זין "חיתוך אחד" של 8 עמודים: החצי העליון = עמודים חיצוניים (כריכה,1–3,12–14,אחורית), החצי התחתון = עמודים 4–11.</li>
+<li>בכל חצי: קפלו ל-8 מלבנים, קפלו לאורך כשההדפסה בחוץ, גזרו חריץ בקו האופקי של שני המלבנים האמצעיים, פתחו ודחפו לצורת "+", וקפלו עד שהכריכה של אותו חצי בחוץ.</li>
 <li>פתחו את הזין של החצי העליון לאמצע (בין עמוד 3 ל-12) והכניסו לתוכו את הזין של החצי התחתון (שהעמוד הראשון שלו הוא 4). קבעו בסיכה אחת או שתיים בשדרה, או בנקודת דבק.</li></ol>
-<p>שימו לב: לפעמים שורה עליונה בכל חצי מודפסת הפוכה – זה מכוון.</p>`
+<p>קווי העזר: כל הקווים מקפלים, חוץ מהקו האופקי שבאמצע הדף (גזירה מלאה) והקטעים האופקיים בשתי העמודות האמצעיות בכל חצי (חריץ גזירה).</p><p>שימו לב: לפעמים שורה עליונה בכל חצי מודפסת הפוכה – זה מכוון.</p>`
  :`<h2>הוראות – זין 16 עמודים (חוברת תפורה/מהודקת, A6)</h2><ol>
 <li>הדפיסו דו-צדדי על 2 דפי A4 לאורך, בגודל 100%. בחרו בחלון ההדפסה אותו סוג היפוך שנבחר כאן (מומלץ: <b>היפוך בצד הקצר</b>). דף 1 = עמודים 1–2 ב-PDF, דף 2 = עמודים 3–4.</li>
-<li>גזרו כל דף A4 לאורך הקו האדום האופקי – מתקבלות 4 רצועות A5 (כל אחת עם 2 עמודים בכל צד).</li>
+<li>קווי העזר: הקו האופקי – גזירה, הקו האנכי – קיפול.</li><li>גזרו כל דף A4 לאורך הקו האופקי שבאמצע – מתקבלות 4 רצועות A5 (כל אחת עם 2 עמודים בכל צד).</li>
 <li>סדרו את הרצועות זו בתוך זו: העליונה מדף 1 בחוץ, אחריה התחתונה מדף 1, אחריה העליונה מדף 2, והתחתונה מדף 2 במרכז. הצד עם הכריכה פונה החוצה.</li>
-<li>קפלו את הערימה באמצע (הקו האפור האנכי) כשהכריכה בחוץ, והדקו 2 סיכות בקיפול. ${rtl()?'החוברת נפתחת מימין לשמאל (שדרה מימין).':'חוברת שנפתחת משמאל לימין.'}</li></ol>
+<li>קפלו את הערימה באמצע (הקו האנכי) כשהכריכה בחוץ, והדקו 2 סיכות בקיפול. ${rtl()?'החוברת נפתחת מימין לשמאל (שדרה מימין).':'חוברת שנפתחת משמאל לימין.'}</li></ol>
 <p>סידור חוברת תקני של 4 גיליונות A5 מקוננים, שניים על כל A4: 16|1 ובגבו 2|15, 14|3 / 4|13 וכו׳. בהיפוך בצד הקצר הגב מודפס הפוך 180° – זה תקין.</p>`);}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button,.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');$(b.dataset.t).classList.add('on');});
 $('helpBtn').onclick=()=>{help();$('helpModal').classList.add('on');};$('helpModal').onclick=e=>{if(e.target.id=='helpModal')$('helpModal').classList.remove('on');};
