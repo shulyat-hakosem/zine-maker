@@ -36,6 +36,29 @@ textarea{width:100%;font-family:inherit;direction:rtl}
 #helpModal.on{display:flex}
 #help{background:#fff;max-width:700px;width:92vw;max-height:88vh;overflow:auto;padding:12px 18px;border-radius:8px;position:relative}
 #help h2{margin-top:0}
+
+/* ---- craft workbench theme ---- */
+body.craft{background:
+ linear-gradient(90deg,#6b4a2b 0,#8a6239 6px,transparent 6px,transparent calc(100% - 6px),#8a6239 calc(100% - 6px),#6b4a2b 100%),
+ url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cg stroke='%23ffffff' fill='none'%3E%3Cpath d='M0 .5H100M.5 0V100' stroke-opacity='.28'/%3E%3Cpath d='M0 20.5H100M0 40.5H100M0 60.5H100M0 80.5H100M20.5 0V100M40.5 0V100M60.5 0V100M80.5 0V100' stroke-opacity='.10'/%3E%3Cpath d='M10.5 0V4M30.5 0V4M50.5 0V7M70.5 0V4M90.5 0V4M0 10.5H4M0 30.5H4M0 50.5H7M0 70.5H4M0 90.5H4' stroke-opacity='.3'/%3E%3C/g%3E%3C/svg%3E"),
+ radial-gradient(ellipse at 50% 40%,#4f7a62 0%,#41664f 70%,#375744 100%);color:#2a2a2a}
+body.craft header{background:linear-gradient(180deg,#a87a4c,#8f6339);background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 3px,rgba(0,0,0,.04) 3px 7px),linear-gradient(180deg,#a87a4c,#8a5e35);box-shadow:0 2px 6px rgba(0,0,0,.35);color:#fffaf0}
+body.craft header h1{text-shadow:0 1px 0 rgba(0,0,0,.35)}
+body.craft button,body.craft details.menu summary{background:#fbf7ee;border:1px solid #b9a683;color:#2a2a2a;box-shadow:0 1px 1px rgba(0,0,0,.15)}
+body.craft button:hover{background:#fff}
+body.craft header button.pri{background:#c8553d;border-color:#a8432f;color:#fff}
+body.craft #gridWrap,body.craft #panel{background:#f6efe0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .35 0 0 0 0 .2 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");box-shadow:0 3px 10px rgba(0,0,0,.28);border-radius:3px;position:relative}
+body.craft #panel::before{content:'';position:absolute;top:-7px;left:50%;width:70px;height:16px;margin-left:-35px;background:repeating-linear-gradient(45deg,rgba(214,120,140,.75) 0 6px,rgba(240,170,185,.75) 6px 12px);transform:rotate(-2deg);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+body.craft #gridWrap::before{content:'';position:absolute;top:-7px;right:24px;width:56px;height:15px;background:rgba(230,212,160,.85);transform:rotate(3deg);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+body.craft #gridWrap{overflow:auto}
+body.craft .thumb{color:#4a4032}
+body.craft .thumb canvas{box-shadow:0 2px 5px rgba(0,0,0,.30),0 0 0 1px rgba(0,0,0,.05)}
+body.craft .thumb.sel{border-color:#c8553d}
+body.craft #edTitle{color:#fffaf0;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+body.craft #ed{border:none;box-shadow:0 6px 18px rgba(0,0,0,.40),0 1px 3px rgba(0,0,0,.3)}
+body.craft .tabs button.on{background:#5a4632;color:#fff;border-color:#5a4632}
+body.craft #status{color:#fff4dc}
+body.craft details.menu .pop{background:#fbf7ee}
 @media (max-width:800px){html,body{overflow:auto;height:auto}main{flex-direction:column}#panel{flex:none}#edWrap{flex:none;height:62vh}#gridWrap{max-height:40vh}header{flex-wrap:wrap}}
 </style></head><body>
 <header><h1>✂️ יוצר זינים</h1>
@@ -48,6 +71,7 @@ textarea{width:100%;font-family:inherit;direction:rtl}
 <label>כיוון קריאה: <select id="dir"><option value="rtl">עברית (שדרה מימין)</option><option value="ltr">לועזית (שדרה משמאל)</option></select></label>
 <label id="lay16L">פריסה: <select id="lay16"><option value="loop">דף A4 אחד חד-צדדי – 4×4 עם חריצים (מומלץ)</option><option value="octavo">דף A4 אחד דו-צדדי – קיפול ×3, בלי גזירה</option><option value="one">דף אחד חד-צדדי (שני חצאים, עם גזירה)</option><option value="booklet">חוברת מהודקת – 2 דפי A4 דו-צדדי</option></select></label>
 <label id="flipL">דו-צדדי: <select id="flip"><option value="short">היפוך בצד הקצר</option><option value="long">היפוך בצד הארוך</option></select></label>
+<label><input type="checkbox" id="craftT" checked> עיצוב שולחן עבודה (משטח חיתוך)</label>
 <label>סגנון קווים: <select id="gstyle"><option value="solid">קו דק רציף</option><option value="dashed">קו מקווקו</option></select></label>
 <label><input type="checkbox" id="safe"> סימון שוליים בטוחים בהדפסה</label>
 <button id="pdfr">👁 תצוגה מקדימה בסדר קריאה (לא להדפסה)</button>
@@ -805,6 +829,8 @@ document.addEventListener('paste',e=>{if(isTyping())return;const items=[...(e.cl
  const html=e.clipboardData&&e.clipboardData.getData('text/html');const m=html&&html.match(/<img[^>]+src="(data:image[^"]+)"/);if(m){addImageSrc(m[1]);return;}
  if(lastClip=='layer'&&layerClip)pasteLayer();else if(pageClip)pastePage();});
 $('copyL').onclick=()=>{if(!copyLayer())status('בחרו שכבה (אלמנט/תמונה) או תיבת טקסט');};$('pasteL').onclick=pasteLayer;
+(function(){const on=localStorage.getItem('zmTheme')!=='plain';document.body.classList.toggle('craft',on);$('craftT').checked=on;
+ $('craftT').onchange=e=>{document.body.classList.toggle('craft',e.target.checked);localStorage.setItem('zmTheme',e.target.checked?'craft':'plain');};})();
 // test hook
 window.__zine={addImageSrc,newEl,rng,T,linkSpread,get cur(){return cur},set cur(v){cur=v},get P(){return P},setProject,makePrintPDF:makePrintPDF2,makeReadingPDF,impose};
 (async()=>{const s=await dbGet().catch(()=>null);if(s){try{setProject(JSON.parse(s));return;}catch(e){}}P={mode:8,pages:[]};ensure();help();refreshAll();})();
