@@ -33,6 +33,9 @@ main{flex:1;min-height:0;display:flex;gap:8px;padding:8px}
 .row input[type=range]{flex:1;min-width:80px}
 .drop{outline:3px dashed #d33}
 textarea{width:100%;font-family:inherit;direction:rtl}
+#dlModal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:20}#dlModal.on{display:flex}
+.dlBox{background:#fffaf0;color:#222;padding:14px 18px;border-radius:8px;width:min(92vw,420px);box-shadow:0 6px 20px #0006}
+.dlA{display:inline-block;background:#c8553d;color:#fff!important;padding:8px 14px;border-radius:6px;text-decoration:none;font-weight:bold;margin:6px 0}
 #helpModal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:10}
 #helpModal.on{display:flex}
 #help{background:#fff;max-width:700px;width:92vw;max-height:88vh;overflow:auto;padding:12px 18px;border-radius:8px;position:relative}
@@ -123,6 +126,10 @@ body.craft details.menu .pop{background:#fbf7ee}
 </div>
 <div class="tab" id="tBg"><div class="row">צבע רקע לעמוד <input type="color" id="bg"></div></div>
 </div></main>
+<div id="dlModal" class="modalBg"><div class="dlBox"><b>ייצוא PDF</b><p id="dlMsg"></p>
+<div id="dlProg" style="height:8px;background:#ddd;border-radius:4px;overflow:hidden"><div id="dlBar" style="height:100%;width:0;background:#c8553d;transition:width .1s"></div></div>
+<div id="dlBtns"><a id="dlLink" class="dlA">⬇ הורד PDF</a> <button id="dlShare">📤 שיתוף</button> <button id="dlOpen">פתח בלשונית חדשה</button></div>
+<div style="margin-top:10px"><button id="dlClose">סגור</button></div></div></div>
 <div id="helpModal"><div id="helpBox" style="position:relative"><div id="help"></div></div></div>
 <script>/** @license
  *
@@ -729,17 +736,29 @@ function drawGuides(doc,sh){const W=sh.orient=='l'?297:210,H=sh.orient=='l'?210:
 function allSrcs(){const out=new Set();const add=pg=>{if(!pg)return;if(pg.img&&pg.img.src)out.add(pg.img.src);(pg.els||[]).forEach(e=>{if(e.type=='image'&&e.src)out.add(e.src);});};P.pages.forEach(add);Object.values(P.spreads||{}).forEach(add);return out;}
 async function waitImgs(){drag=null;await document.fonts.ready;for(const src of allSrcs()){const im=getImg(src);if(!im.complete||!im.naturalWidth){await new Promise(r=>{im.addEventListener('load',r,{once:true});im.addEventListener('error',r,{once:true});setTimeout(r,8000);});}try{await im.decode();}catch(e){}}}
 function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+p(d.getSeconds());}
-async function makePrintPDF2(){await waitImgs();const {jsPDF}=window.jspdf;let doc;
+let _pi=0,_pn=1,_q=1;const _prog=(i,n)=>{const b=$('dlBar');if(b)b.style.width=Math.round(100*i/n)+'%';};
+async function makePrintPDF2(){await waitImgs();_pi=0;_pn=impose().reduce((a,s)=>a+s.cells.length,0);const {jsPDF}=window.jspdf;let doc;
  for(const sh of impose()){const o=sh.orient=='l'?'landscape':'portrait';if(!doc)doc=new jsPDF({orientation:o,unit:'mm',format:'a4'});else doc.addPage('a4',o);
-  for(const c of sh.cells){const W=Math.round(c.w*MM),H=Math.round(c.h*MM);let cv=pageCanvas(c.page,W,H,{safe:$('safe').checked});
+  for(const c of sh.cells){_prog(++_pi,_pn);await new Promise(r=>setTimeout(r,0));const W=Math.round(c.w*MM*_q),H=Math.round(c.h*MM*_q);let cv=pageCanvas(c.page,W,H,{safe:$('safe').checked});
    if(c.rot==180){const r=document.createElement('canvas');r.width=W;r.height=H;const x=r.getContext('2d');x.translate(W,H);x.rotate(Math.PI);x.drawImage(cv,0,0);cv=r;}
-   doc.addImage(cv.toDataURL('image/jpeg',0.92),'JPEG',c.x,c.y,c.w,c.h,undefined,'FAST');}
+   doc.addImage(cv.toDataURL('image/jpeg',0.9),'JPEG',c.x,c.y,c.w,c.h,undefined,'FAST');cv.width=cv.height=0;}
   if($('guides').checked)drawGuides(doc,sh);}
  return doc;}
 async function makeReadingPDF(){await waitImgs();const {jsPDF}=window.jspdf;const [w,h]=pageMM();const doc=new jsPDF({unit:'mm',format:[w,h],orientation:'portrait'});
  P.pages.forEach((p,i)=>{if(i)doc.addPage([w,h],'portrait');doc.addImage(pageCanvas(i,Math.round(w*MM),Math.round(h*MM)).toDataURL('image/jpeg',0.92),'JPEG',0,0,w,h,undefined,'FAST');});return doc;}
-$('pdf').onclick=async()=>{status('מייצר PDF…');(await makePrintPDF2()).save('zine-print-'+P.mode+'-'+stamp()+'.pdf');status('PDF מוכן');};
-$('pdfr').onclick=async()=>{status('מייצר PDF…');(await makeReadingPDF()).save('zine-reading-'+P.mode+'-'+stamp()+'.pdf');status('PDF מוכן');};
+const isMobile=/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+let _dlURL=null,_dlBlob=null,_dlName='';
+function dlUI(state,msg){const m=$('dlModal');m.classList.add('on');$('dlMsg').textContent=msg||'';$('dlProg').style.display=state=='busy'?'':'none';$('dlBtns').style.display=state=='ready'?'':'none';$('dlShare').style.display=(state=='ready'&&navigator.canShare&&navigator.canShare({files:[new File([''],'a.pdf',{type:'application/pdf'})]}))?'':'none';}
+async function exportFlow(kind){try{dlUI('busy','מייצר PDF… רגע');_q=isMobile?0.8:1;$('dlBar').style.width='0%';await new Promise(r=>setTimeout(r,30));
+  const doc=kind=='print'?await makePrintPDF2():await makeReadingPDF();_dlBlob=doc.output('blob');_dlName='zine-'+(kind=='print'?'print':'reading')+'-'+P.mode+'-'+stamp()+'.pdf';
+  if(_dlURL)URL.revokeObjectURL(_dlURL);_dlURL=URL.createObjectURL(_dlBlob);const a=$('dlLink');a.href=_dlURL;a.download=_dlName;
+  dlUI('ready','ה-PDF מוכן ('+Math.round(_dlBlob.size/1024)+' KB). לחצו להורדה:');
+  if(!isMobile){try{a.click();}catch(e){}}}
+ catch(err){console.error(err);dlUI('err','שגיאה ביצירת ה-PDF: '+(err&&err.message||err)+'. נסו לסגור לשוניות אחרות או להקטין תמונות.');}finally{_q=1;}}
+$('pdf').onclick=()=>exportFlow('print');$('pdfr').onclick=()=>exportFlow('reading');
+$('dlOpen').onclick=()=>{if(_dlURL)window.open(_dlURL,'_blank');};
+$('dlShare').onclick=async()=>{try{await navigator.share({files:[new File([_dlBlob],_dlName,{type:'application/pdf'})],title:_dlName});}catch(e){}};
+$('dlClose').onclick=()=>$('dlModal').classList.remove('on');
 $('dir').onchange=e=>{unlinkAll();P.dir=e.target.value;help();refreshAll();};$('lay16').onchange=e=>{unlinkAll();P.layout16=e.target.value;help();refreshAll();};
 // ---------- help ----------
 function help(){$('flipL').style.display=P.mode==16&&lay()!='one'&&lay()!='loop'?'':'none';$('lay16L').style.display=P.mode==16?'':'none';
