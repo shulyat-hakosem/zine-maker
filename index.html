@@ -649,29 +649,29 @@ const clamp=(v,a=0,b=1)=>v<a?a:v>b?b:v;
 
 // ===================== filters (print looks) =====================
 const FILTERS=[['none','רגיל'],['bw','שחור-לבן'],['halftone','נקודות'],['riso','ריזו'],['photocopy','צילום'],['misreg','בריחת צבע'],['stamp','חותמת']];
-const INKDEF={riso:'#e8467c',stamp:'#1d2b5a',halftone:'#111111',none:'#111111',bw:'#111111',photocopy:'#111111',misreg:'#111111'};
+const INKDEF={riso:'#e8467c',stamp:'#1d2b5a',halftone:'#111111',none:'#111111',bw:'#111111',photocopy:'#111111',misreg:'#ff3d8b'};
 const fcache=new Map();
 function vnoise(w,h,seed,scale){const r=rng(seed);const gw=Math.ceil(w/scale)+2,gh=Math.ceil(h/scale)+2;const g=new Float32Array(gw*gh);for(let i=0;i<g.length;i++)g[i]=r();
  const out=new Float32Array(w*h);for(let y=0;y<h;y++){const fy=y/scale,iy=fy|0,ty=fy-iy;for(let x=0;x<w;x++){const fx=x/scale,ix=fx|0,tx=fx-ix;const a=g[iy*gw+ix],b=g[iy*gw+ix+1],c=g[(iy+1)*gw+ix],d=g[(iy+1)*gw+ix+1];out[y*w+x]=(a*(1-tx)+b*tx)*(1-ty)+(c*(1-tx)+d*tx)*ty;}}return out;}
 function processed(L){const im=getImg(L.src);if(!im.complete||!im.naturalWidth)return null;const f=L.filter||'none';if(f=='none'&&!L.mult)return im;
- const key=L.src.length+'|'+L.src.slice(-64)+'|'+f+'|'+(L.mult?1:0)+'|'+(L.ink||'')+'|'+(L.fseed||1);if(fcache.has(key))return fcache.get(key);
- const c=applyFilter(im,f,!!L.mult,L.ink||INKDEF[f],L.fseed||1);fcache.set(key,c);return c;}
-function applyFilter(im,f,mult,ink,seed){const MX=1400;let w=im.naturalWidth,h=im.naturalHeight;const k=Math.min(1,MX/Math.max(w,h));w=Math.max(1,Math.round(w*k));h=Math.max(1,Math.round(h*k));
+ const key=L.src.length+'|'+L.src.slice(-64)+'|'+f+'|'+(L.mult?1:0)+'|'+(L.ink||'')+'|'+(L.fseed||1)+'|'+(L.hs||0);if(fcache.has(key))return fcache.get(key);
+ const c=applyFilter(im,f,!!L.mult,L.ink||INKDEF[f],L.fseed||1,L.hs||HSDEF);fcache.set(key,c);return c;}
+const HSDEF=170;
+function applyFilter(im,f,mult,ink,seed,hs){const MX=1400;let w=im.naturalWidth,h=im.naturalHeight;const k=Math.min(1,MX/Math.max(w,h));w=Math.max(1,Math.round(w*k));h=Math.max(1,Math.round(h*k));
  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,w,h);
  const id=x.getImageData(0,0,w,h),d=id.data,n=w*h;const r=rng(seed*7919+13);const [ir,ig,ib]=hex(ink);
  const Lm=new Float32Array(n);for(let i=0,j=0;j<n;i+=4,j++){const a=d[i+3]/255;Lm[j]=((0.299*d[i]+0.587*d[i+1]+0.114*d[i+2])*a+255*(1-a))/255;}
- if(f=='halftone'){x.clearRect(0,0,w,h);if(!mult){x.fillStyle='#fff';x.fillRect(0,0,w,h);}x.fillStyle=ink;const cell=Math.max(3,Math.round(Math.max(w,h)/85));
-  for(let gy=cell/2;gy<h;gy+=cell)for(let gx=cell/2;gx<w;gx+=cell){const v=1-Lm[(Math.min(h-1,gy|0))*w+Math.min(w-1,gx|0)];const rr=cell*0.62*Math.sqrt(v);if(rr>0.3){x.beginPath();x.arc(gx,gy,rr,0,7);x.fill();}}return c;}
+ if(f=='halftone'){x.clearRect(0,0,w,h);if(!mult){x.fillStyle='#fff';x.fillRect(0,0,w,h);}x.fillStyle=ink;const cell=Math.max(2.5,Math.max(w,h)/(hs||HSDEF));
+  for(let gy=cell/2;gy<h;gy+=cell)for(let gx=cell/2;gx<w;gx+=cell){const v=1-Lm[(Math.min(h-1,gy|0))*w+Math.min(w-1,gx|0)];const rr=cell*0.66*Math.sqrt(v);if(rr>0.25){x.beginPath();x.arc(gx,gy,rr,0,7);x.fill();}}return c;}
  let nz=null;if(f=='stamp'||f=='photocopy')nz=vnoise(w,h,seed,Math.max(w,h)/28);
  let nz2=f=='stamp'?vnoise(w,h,seed+5,Math.max(w,h)/120):null;
- const ox=Math.round(w*0.014),oy=Math.round(h*0.009);const m=Math.min(w,h);
+ const ox=Math.max(1,Math.round(Math.max(w,h)*0.005)),oy=Math.max(1,Math.round(Math.max(w,h)*0.0035));const mr=hex(ink||'#ff3d8b');const m=Math.min(w,h);
  for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){const j=y*w+xx,i=j*4;let R=d[i],G=d[i+1],B=d[i+2],A=255;const l=Lm[j];
   if(f=='bw'){const v=clamp((l-0.5)*1.15+0.5)*255;R=G=B=v;}
   else if(f=='riso'){const dd=clamp((1-l)*1.25+(r()-0.5)*0.14);R=255-dd*(255-ir);G=255-dd*(255-ig);B=255-dd*(255-ib);}
   else if(f=='photocopy'){let v=(l-0.5)*2.8+0.5+(r()-0.5)*0.22+(nz[j]-0.5)*0.25;const ed=Math.min(xx,y,w-1-xx,h-1-y)/(0.07*m);if(ed<1)v-=0.35*(1-ed);if(r()<0.003)v=0;v=v<0.42?0.06:v>0.62?1:0.06+(v-0.42)/0.2*0.94;R=G=B=clamp(v)*255;}
-  else if(f=='misreg'){const j2=Math.min(h-1,Math.max(0,y-oy))*w+Math.min(w-1,Math.max(0,xx-ox));const d1=clamp(1-d[i]/255*1.0),d2=clamp(1-d[j2*4+1]/255);
-   const b1=[0,120,191],b2=[255,72,176];const k1=[1-d1*(1-b1[0]/255),1-d1*(1-b1[1]/255),1-d1*(1-b1[2]/255)],k2=[1-d2*(1-b2[0]/255),1-d2*(1-b2[1]/255),1-d2*(1-b2[2]/255)];
-   R=255*k1[0]*k2[0];G=255*k1[1]*k2[1];B=255*k1[2]*k2[2];}
+  else if(f=='misreg'){const j2=Math.min(h-1,Math.max(0,y-oy))*w+Math.min(w-1,Math.max(0,xx-ox));const dk=clamp((1-Lm[j2])*0.5);
+   R=R*(1-dk*(1-mr[0]/255));G=G*(1-dk*(1-mr[1]/255));B=B*(1-dk*(1-mr[2]/255));}
   else if(f=='stamp'){const dd=1-l;const ed=Math.min(xx,y,w-1-xx,h-1-y)/(0.05*m);const t=0.42+(nz[j]-0.5)*0.35+(ed<1?(1-ed)*0.35:0);let on=dd>t&&nz2[j]>0.2&&r()>0.05;R=ir;G=ig;B=ib;A=on?Math.round(255*(0.78+0.22*nz[j])):0;}
   if(mult&&f!='stamp'){const ll=(0.299*R+0.587*G+0.114*B)/255;const a=clamp((1-ll)*1.3-0.06);if(f=='none'||f=='bw'||f=='photocopy'){R=ir;G=ig;B=ib;}A=Math.round(a*255);}
   d[i]=R;d[i+1]=G;d[i+2]=B;d[i+3]=A;}
@@ -679,15 +679,20 @@ function applyFilter(im,f,mult,ink,seed){const MX=1400;let w=im.naturalWidth,h=i
 
 // ===================== page textures =====================
 const TEXK=[['paper','נייר'],['cardboard','קרטון'],['photocopy','צילום'],['grain','גרעין'],['halftone','נקודות'],['stains','כתמים']];
-function drawTex(ctx,t,W,H){const u=W/1000,r=rng(t.seed||1);ctx.save();ctx.globalAlpha=clamp(t.amt??.5);ctx.translate(W/2,H/2);const w=W,h=H;
- if(t.kind=='paper'||t.kind=='cardboard'){if(t.kind=='cardboard'){ctx.fillStyle='rgba(176,128,70,.55)';ctx.fillRect(-w/2,-h/2,w,h);ctx.fillStyle='rgba(90,60,25,.05)';for(let y=-h/2;y<h/2;y+=14*u)ctx.fillRect(-w/2,y,w,5*u);}
-  for(let k=0;k<5000;k++){ctx.fillStyle=r()<.5?'rgba(80,60,30,.10)':'rgba(255,255,255,.18)';const s=u*(0.8+r()*1.8);ctx.fillRect((r()-.5)*w,(r()-.5)*h,s,s);}
-  ctx.lineWidth=u*0.7;for(let k=0;k<260;k++){ctx.strokeStyle='rgba(90,70,40,'+(0.06+r()*.10)+')';const x=(r()-.5)*w,y=(r()-.5)*h,l=u*(8+r()*30),a=r()*Math.PI*2;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+Math.cos(a)*l/2+(r()-.5)*u*6,y+Math.sin(a)*l/2+(r()-.5)*u*6,x+Math.cos(a)*l,y+Math.sin(a)*l);ctx.stroke();}}
- else if(t.kind=='photocopy'){for(let k=0;k<4;k++){const x=(r()-.5)*w,bw=u*(20+r()*90);const g=ctx.createLinearGradient(x-bw,0,x+bw,0);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.5,'rgba(0,0,0,.10)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(x-bw,-h/2,2*bw,h);}
-  for(let k=0;k<3500;k++){ctx.fillStyle='rgba(0,0,0,'+(0.25+r()*.5)+')';const s=u*(0.6+r()*1.6);ctx.fillRect((r()-.5)*w,(r()-.5)*h,s,s);}
-  const g=ctx.createRadialGradient(0,0,Math.min(w,h)*.35,0,0,Math.max(w,h)*.75);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.28)');ctx.fillStyle=g;ctx.fillRect(-w/2,-h/2,w,h);}
- else{const pat={grain:'noise',halftone:'halftone',stains:'stains'}[t.kind];EL.texture(ctx,w,h,r,{pat,color:'#000000'},u);}
- ctx.restore();}
+const texCache=new Map();
+function texCanvas(t,W,H){const key=t.kind+'|'+(t.seed||1)+'|'+W+'|'+H;if(texCache.has(key))return texCache.get(key);
+ const c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');const u=W/1000,r=rng(t.seed||1);ctx.translate(W/2,H/2);const w=W,h=H;
+ if(t.kind=='paper'||t.kind=='cardboard'){if(t.kind=='cardboard'){ctx.fillStyle='rgb(206,166,118)';ctx.fillRect(-w/2,-h/2,w,h);ctx.fillStyle='rgba(90,60,25,.10)';for(let y=-h/2;y<h/2;y+=14*u)ctx.fillRect(-w/2,y,w,5*u);}
+  else{ctx.fillStyle='rgba(214,196,160,.35)';ctx.fillRect(-w/2,-h/2,w,h);}
+  for(let k=0;k<14000;k++){ctx.fillStyle=r()<.55?'rgba(90,66,30,.28)':'rgba(255,255,255,.45)';const s=u*(0.7+r()*1.8);ctx.fillRect((r()-.5)*w,(r()-.5)*h,s,s);}
+  ctx.lineWidth=u*0.8;for(let k=0;k<700;k++){ctx.strokeStyle='rgba(90,70,40,'+(0.15+r()*.25)+')';const x=(r()-.5)*w,y=(r()-.5)*h,l=u*(8+r()*30),a=r()*Math.PI*2;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+Math.cos(a)*l/2+(r()-.5)*u*6,y+Math.sin(a)*l/2+(r()-.5)*u*6,x+Math.cos(a)*l,y+Math.sin(a)*l);ctx.stroke();}}
+ else if(t.kind=='photocopy'){for(let k=0;k<4;k++){const x=(r()-.5)*w,bw=u*(20+r()*90);const g=ctx.createLinearGradient(x-bw,0,x+bw,0);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.5,'rgba(0,0,0,.16)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(x-bw,-h/2,2*bw,h);}
+  for(let k=0;k<5000;k++){ctx.fillStyle='rgba(0,0,0,'+(0.3+r()*.5)+')';const s=u*(0.6+r()*1.6);ctx.fillRect((r()-.5)*w,(r()-.5)*h,s,s);}
+  const g=ctx.createRadialGradient(0,0,Math.min(w,h)*.35,0,0,Math.max(w,h)*.75);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.32)');ctx.fillStyle=g;ctx.fillRect(-w/2,-h/2,w,h);}
+ else if(t.kind=='grain'){for(let k=0;k<26000;k++){ctx.fillStyle=r()<.6?'rgba(0,0,0,'+(0.25+r()*.4)+')':'rgba(255,255,255,'+(0.3+r()*.4)+')';const s=u*(0.6+r()*1.3);ctx.fillRect((r()-.5)*w,(r()-.5)*h,s,s);}}
+ else{const pat={halftone:'halftone',stains:'stains'}[t.kind];EL.texture(ctx,w,h,r,{pat,color:'#000000'},u);if(t.kind=='stains'){ctx.globalAlpha=.6;EL.texture(ctx,w,h,r,{pat,color:'#5a3d1a'},u);}}
+ if(texCache.size>40)texCache.delete(texCache.keys().next().value);texCache.set(key,c);return c;}
+function drawTex(ctx,t,W,H){if(!t||!t.kind)return;const c=texCanvas(t,Math.round(W),Math.round(H));ctx.save();ctx.globalAlpha=clamp(t.amt??.5);if(t.kind=='cardboard')ctx.globalCompositeOperation='multiply';ctx.drawImage(c,0,0,W,H);ctx.restore();}
 
 // ===================== layers =====================
 function ar(L){const im=getImg(L.src);if(im.naturalWidth){L.ar=im.naturalHeight/im.naturalWidth;}return L.ar||0.75;}
@@ -707,9 +712,11 @@ function drawLayer(ctx,L,W,H){if(L.type=='draw'){drawStrokes(ctx,L,W,H);return;}
    if(L.bgOn){ctx.fillStyle=L.bg||'#fff';ctx.fillRect(-bw/2,-bh/2,bw,bh);}ctx.fillStyle=L.color||'#111';ls.forEach((s,k)=>ctx.fillText(s,0,y0+k*lh));}
   else if(EL[L.type])EL[L.type](ctx,bw,bh,rng(L.seed||1),L,u);}catch(e){console.warn(e)}
  ctx.restore();}
-function paintPage(x,i,W,H,opts={}){const pg=P.pages[i];x.save();x.fillStyle=pg.bg||'#fff';x.fillRect(0,0,W,H);if(pg.tex&&pg.tex.kind)drawTex(x,pg.tex,W,H);
+// texture position: tex.z = -1 behind everything, k = drawn before layer k, null/undefined = above everything
+function texZ(pg){if(!pg.tex||!pg.tex.kind)return -99;const n=(pg.layers||[]).length,z=pg.tex.z;return z==null||z>=n?n:Math.max(-1,z);}
+function paintPage(x,i,W,H,opts={}){const pg=P.pages[i];x.save();x.fillStyle=pg.bg||'#fff';x.fillRect(0,0,W,H);const tz=texZ(pg);if(tz==-1)drawTex(x,pg.tex,W,H);
  const sl=spLayers(i);if(sl){const big=document.createElement('canvas');big.width=2*W;big.height=H;const bx=big.getContext('2d');sl.forEach(L=>drawLayer(bx,L,2*W,H));x.drawImage(big,spHalf(i)?-W:0,0);big.width=0;}
- (pg.layers||[]).forEach(L=>drawLayer(x,L,W,H));
+ (pg.layers||[]).forEach((L,k)=>{if(k==tz)drawTex(x,pg.tex,W,H);drawLayer(x,L,W,H);});if(tz>=(pg.layers||[]).length)drawTex(x,pg.tex,W,H);
  if(opts.safe){const m=5*W/pageMM()[0];x.strokeStyle='rgba(0,150,255,.55)';x.setLineDash([W/60,W/80]);x.lineWidth=Math.max(1,W/400);x.strokeRect(m,m,W-2*m,H-2*m);x.setLineDash([]);}
  x.restore();}
 function renderPage(i,W,H,opts){const c=document.createElement('canvas');c.width=W;c.height=H;paintPage(c.getContext('2d'),i,W,H,opts);return c;}
@@ -762,9 +769,15 @@ ed.addEventListener('pointerdown',e=>{ed.setPointerCapture(e.pointerId);const p=
   if(near(H.del)){delSel();return;}
   if(near(H.rot)){act={k:'rot',g,a0:Math.atan2(p[1]-g.cy,p[0]-g.cx),r0:sel.L.rot||0};return;}
   if(H.corners.some(near)){act={k:'size',g,d0:Math.hypot(p[0]-g.cx,p[1]-g.cy)||1,s0:sizeGet(sel.L),st:{w:sel.L.w,h:sel.L.h}};return;}}
- const s=hitTest(p[0],p[1]);if(s){if(!sel||sel.L!==s.L){sel=s;renderPanel();}act={k:'move',p0:p,x0:s.L.x,y0:s.L.y};}else{if(sel){sel=null;renderPanel();}act=null;}refreshEditor();});
+ const s=hitTest(p[0],p[1]);
+ // touch: only an already-selected element can be dragged; anything else scrolls the page (tap = select)
+ if(e.pointerType=='touch'&&!(s&&sel&&sel.L===s.L)){act={k:'pan',hit:s,cy0:e.clientY,cx0:e.clientX,sy:scrollY,moved:false,v:0,t:performance.now(),ly:e.clientY};return;}
+ if(s){if(!sel||sel.L!==s.L){sel=s;renderPanel();}act={k:'move',p0:p,x0:s.L.x,y0:s.L.y};}else{if(sel){sel=null;renderPanel();}act=null;}refreshEditor();});
+let fling=0;function flingGo(v){cancelAnimationFrame(fling);const step=()=>{if(Math.abs(v)<0.05)return;scrollBy(0,-v*16);v*=0.93;fling=requestAnimationFrame(step);};fling=requestAnimationFrame(step);}
+ed.addEventListener('pointerdown',()=>cancelAnimationFrame(fling),true);
 ed.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;const p=evPt(e);ptrs.set(e.pointerId,p);
  if(tool=='draw'){if(ptrs.size==1)moveStroke(p);return;}
+ if(act&&act.k=='pan'){if(ptrs.size>1)return;const dy=e.clientY-act.cy0,dx=e.clientX-act.cx0;if(Math.hypot(dx,dy)>8)act.moved=true;if(act.moved){scrollTo(scrollX,act.sy-dy);const t=performance.now();act.v=(e.clientY-act.ly)/Math.max(1,t-act.t);act.t=t;act.ly=e.clientY;}return;}
  if(!act||!sel)return;const L=sel.L;
  if(act.k=='pinch'&&ptrs.size>=2){const a=[...ptrs.values()];const d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]),an=Math.atan2(a[1][1]-a[0][1],a[1][0]-a[0][0]);sizeSet(L,act.s0*d/act.d0,act.st);L.rot=snap(act.r0+(an-act.a0)*180/Math.PI);}
  else if(act.k=='move'&&ptrs.size==1){const f=frame(sel);L.x=act.x0+(p[0]-act.p0[0])/f.W;L.y=act.y0+(p[1]-act.p0[1])/f.H;}
@@ -772,7 +785,8 @@ ed.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;const p=e
  else if(act.k=='rot'){const g=act.g;L.rot=snap(act.r0+(Math.atan2(p[1]-g.cy,p[0]-g.cx)-act.a0)*180/Math.PI);}
  refreshEditor();});
 function snap(r){r=((r%360)+540)%360-180;for(const s of[-180,-90,0,90,180])if(Math.abs(r-s)<3)return s;return r;}
-function pend(e){ptrs.delete(e.pointerId);if(tool=='draw'){endStroke();return;}if(act&&(act.k!='pinch'||ptrs.size<2)){act=null;refreshAll();}}
+function pend(e){ptrs.delete(e.pointerId);if(tool=='draw'){endStroke();return;}
+ if(act&&act.k=='pan'){const a=act;act=null;if(!a.moved&&e.type=='pointerup'){sel=a.hit;renderPanel();refreshEditor();}else if(a.moved&&performance.now()-a.t<80)flingGo(a.v);return;}if(act&&(act.k!='pinch'||ptrs.size<2)){act=null;refreshAll();}}
 ed.addEventListener('pointerup',pend);ed.addEventListener('pointercancel',pend);
 ed.addEventListener('wheel',e=>{if(!sel)return;e.preventDefault();const st={w:sel.L.w,h:sel.L.h};sizeSet(sel.L,sizeGet(sel.L)*(e.deltaY<0?1.05:1/1.05),st);refreshAll();},{passive:false});
 ed.ondragover=e=>e.preventDefault();ed.ondrop=e=>{e.preventDefault();addImageFiles([...e.dataTransfer.files]);};
@@ -787,7 +801,7 @@ function endStroke(){if(stroke){stroke=null;refreshAll();}}
 // ===================== context panel =====================
 const EDGES=[['none','ללא'],['cut','גזור'],['zigzag','זיגזג'],['torn','קרוע']];
 const chip=(act,val,txt,on,title)=>`<button data-a="${act}" data-v="${val}" class="${on?'on':''}" ${title?`title="${title}"`:''}>${txt}</button>`;
-function setTool(t){tool=tool==t?null:t;if(tool)sel=tool=='draw'?null:sel;['tCol','tTex','tDraw'].forEach(id=>$(id).classList.toggle('on',tool=={tCol:'col',tTex:'tex',tDraw:'draw'}[id]));refreshAll();}
+function setTool(t){tool=tool==t?null:t;if(tool)sel=tool=='draw'?null:sel;['tImg','tCol','tTex','tDraw'].forEach(id=>$(id).classList.toggle('on',tool=={tImg:'img',tCol:'col',tTex:'tex',tDraw:'draw'}[id]));refreshAll();}
 function renderPanel(){const p=$('panel');const pg=P.pages[cur];let h='';
  if(tool=='draw'){h=`<h3>✏️ ציור חופשי</h3><div class="lbl">עובי</div><div class="chips">${[[.003,'דק'],[.008,'בינוני'],[.02,'עבה']].map(([w,t])=>chip('pw',w,t,!pen.er&&pen.w==w)).join('')}</div>
   <div class="row">צבע <input type="color" id="pc" value="${pen.c}"> ${chip('per',1,'🧽 מחק',pen.er)}</div><div class="row"><button data-a="pclear">🗑 נקה ציור בעמוד</button></div><div class="row"><button data-a="tool" data-v="draw">✔ סיום ציור</button></div><p class="hint">מציירים ישירות על העמוד. האצבע/העכבר מציירים כל עוד מצב ציור פעיל.</p>`;}
@@ -795,19 +809,20 @@ function renderPanel(){const p=$('panel');const pg=P.pages[cur];let h='';
   const order=`<div class="row"><button data-a="up">⬆ קדימה</button><button data-a="down">⬇ אחורה</button><button data-a="dup">📑 שכפל</button><button data-a="del" class="del">🗑 מחק</button></div>`;
   const edges=`<div class="lbl">קצוות</div><div class="chips">${EDGES.map(([v,n])=>chip('edge',v,n,(L.edge||'none')==v)).join('')}${chip('ereroll',1,'🎲',false,'הגרלת קצה חדש')}</div>`;
   const opac=`<div class="row">שקיפות <input type="range" id="lop" min="0.1" max="1" step="0.01" value="${L.op??1}"></div>`;
-  if(t=='image'){const f=L.filter||'none';const needInk=L.mult||['riso','stamp','halftone'].includes(f);
+  if(t=='image'){const f=L.filter||'none';const needInk=L.mult||['riso','stamp','halftone','misreg'].includes(f);
    h=`<h3>🖼 תמונה${sel.own=='s'?' (כפולה)':''}</h3><div class="row"><button data-a="fill">מלא</button><button data-a="fit">התאם</button><button data-a="spread">${sel.own=='s'?'↩ בטל כפולה':'↔ פרוש על כפולה'}</button></div>
    <div class="lbl">מראה הדפסה</div><div class="chips">${FILTERS.map(([v,n])=>chip('filter',v,n,f==v)).join('')}</div>
-   <div class="row"><label title="הלבן נעלם, הקווים נשארים – לסקיצות סרוקות"><input type="checkbox" id="lmult" ${L.mult?'checked':''}> רק קווים</label>${needInk?`<label>דיו <input type="color" id="link" value="${L.ink||INKDEF[f]}"></label>`:''}</div>${edges}${opac}${order}`;}
+   <div class="row"><label title="הלבן נעשה שקוף ורק הקווים/הצבע נשארים – מצוין לסקיצות סרוקות"><input type="checkbox" id="lmult" ${L.mult?'checked':''}> שקוף (מולטיפליי)</label>${needInk?`<label>דיו <input type="color" id="link" value="${L.ink||INKDEF[f]}"></label>`:''}</div>${f=='halftone'?`<div class="row">גודל נקודות <input type="range" id="lhs" min="60" max="320" step="5" value="${L.hs||HSDEF}" style="direction:ltr" title="שמאלה: נקודות גדולות · ימינה: עדינות"></div>`:''}${edges}${opac}${order}<div class="row"><button data-a="pasteimg">📋 הדבק תמונה</button></div>`;}
   else if(t=='text'){h=`<h3>🔤 טקסט</h3><textarea id="ltext" rows="3">${(L.text||'').replace(/</g,'&lt;')}</textarea>
    <div class="row"><button data-a="font" title="גופן הבא">🎲 גופן</button> צבע <input type="color" id="lcol" value="${L.color||'#111111'}"></div>
    <div class="row"><label><input type="checkbox" id="lbgOn" ${L.bgOn?'checked':''}> רקע לטקסט</label><input type="color" id="lbg" value="${L.bg||'#ffffff'}"></div>${opac}${order}<p class="hint">גוררים להזזה, פינה לשינוי גודל, ↻ לסיבוב.</p>`;}
   else{h=`<h3>✂️ ${ELNAMES[t]||'קולאז׳'}</h3><div class="row">צבע <input type="color" id="lcol" value="${L.color||'#e3d3a8'}"> <button data-a="vary">🎲 וריאציה</button></div>
    ${t=='washi'?`<div class="chips">${[['stripes','פסים'],['dots','נקודות'],['grid','משבצות'],['plain','חלק']].map(([v,n])=>chip('pat',v,n,L.pat==v)).join('')}</div>`:''}${edges}${opac}${order}`;}}
  else if(tool=='col'){h=`<h3>✂️ קולאז׳</h3><p class="hint">כל לחיצה מוסיפה פריט אחד לעמוד.</p><div class="chips">${[['sticky','פתק'],['strip','רצועת נייר'],['washi','וואשי'],['masking','נייר דבק']].map(([v,n])=>chip('add',v,n,false)).join('')}${chip('add','rand','🎲 אקראי',false)}</div>`;}
- else if(tool=='tex'){const tx=pg.tex;h=`<h3>🧻 טקסטורה לעמוד</h3><p class="hint">טקסטורה אחת לעמוד, תמיד מאחורי הכול.</p><div class="row"><button data-a="texr" style="flex:1;font-size:15px">🎲 טקסטורה</button></div>
-  <div class="chips">${TEXK.map(([v,n])=>chip('texk',v,n,tx&&tx.kind==v)).join('')}${chip('texk','none','ללא',!tx)}</div>${tx?`<div class="row">עוצמה <input type="range" id="texa" min="0.05" max="1" step="0.01" value="${tx.amt}"></div>`:''}`;}
- else{h=`<h3>${label(cur)}</h3><p class="hint">לחצו על פריט בעמוד כדי לערוך אותו: גרירה להזזה, ריבוע בפינה לשינוי גודל, ↻ לסיבוב, ✕ למחיקה. בטלפון: שתי אצבעות להגדלה וסיבוב.<br>להוספה – הכפתורים למעלה. אפשר גם להדביק תמונה (Ctrl+V) או לגרור קבצים לעמוד.</p>
+ else if(tool=='tex'){const tx=pg.tex;h=`<h3>🧻 טקסטורה לעמוד</h3><p class="hint">טקסטורה אחת לעמוד. כברירת מחדל היא מעל הכול – אפשר להזיז אחורה/קדימה.</p><div class="row"><button data-a="texr" style="flex:1;font-size:15px">🎲 טקסטורה</button></div>
+  <div class="chips">${TEXK.map(([v,n])=>chip('texk',v,n,tx&&tx.kind==v)).join('')}${chip('texk','none','ללא',!tx)}</div>${tx?`<div class="row">עוצמה <input type="range" id="texa" min="0.05" max="1" step="0.01" value="${tx.amt}"></div><div class="row"><button data-a="texup">⬆ קדימה</button><button data-a="texdown">⬇ אחורה</button></div><p class="hint" id="texpos">מיקום: ${texPosName(pg)}</p>`:''}`;}
+ else if(tool=='img'){h=`<h3>🖼 תמונה</h3><div class="row"><button data-a="pickimg" style="flex:1;font-size:15px">🖼 בחירת תמונה</button></div><div class="row"><button data-a="pasteimg" style="flex:1;font-size:15px">📋 הדבק תמונה</button></div><p class="hint">אפשר לבחור כמה תמונות יחד, לגרור קבצים לעמוד, או להעתיק תמונה ולהדביק.</p>`;}
+ else{h=`<h3>${label(cur)}</h3><p class="hint">לחצו על פריט בעמוד כדי לערוך אותו: גרירה להזזה, ריבוע בפינה לשינוי גודל, ↻ לסיבוב, ✕ למחיקה. בטלפון: הקשה בוחרת פריט, ואז גוררים אותו או מגדילים ומסובבים בשתי אצבעות. גרירה על פריט שלא נבחר גוללת את הדף.<br>להוספה – הכפתורים למעלה. אפשר גם להדביק תמונה (Ctrl+V) או לגרור קבצים לעמוד.</p>
   <div class="row">צבע רקע לעמוד <input type="color" id="pbg" value="${pg.bg||'#ffffff'}"></div>`;}
  p.innerHTML=h;wirePanel();}
 function wirePanel(){const p=$('panel');p.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>panelAct(b.dataset.a,b.dataset.v));
@@ -816,7 +831,7 @@ function wirePanel(){const p=$('panel');p.querySelectorAll('[data-a]').forEach(b
  on('lop','input',e=>{sel.L.op=+e.target.value;refreshEditorAndSoon();});on('lcol','input',e=>{sel.L.color=e.target.value;refreshEditorAndSoon();});
  on('ltext','input',e=>{sel.L.text=e.target.value;refreshEditorAndSoon();});on('lbgOn','change',e=>{sel.L.bgOn=e.target.checked;refreshAll();});on('lbg','input',e=>{sel.L.bg=e.target.value;refreshEditorAndSoon();});
  on('lmult','change',e=>{sel.L.mult=e.target.checked;refreshAll();});on('link','input',e=>{sel.L.ink=e.target.value;refreshEditorAndSoon();});
- on('texa','input',e=>{P.pages[cur].tex.amt=+e.target.value;refreshEditorAndSoon();});}
+ on('lhs','change',e=>{sel.L.hs=+e.target.value;refreshAll();});on('texa','input',e=>{P.pages[cur].tex.amt=+e.target.value;refreshEditorAndSoon();});}
 let rq;function refreshEditorAndSoon(){refreshEditor();clearTimeout(rq);rq=setTimeout(()=>{refreshGrid();autosave();},300);}
 function panelAct(a,v){const pg=P.pages[cur];const L=sel&&sel.L;
  switch(a){
@@ -831,8 +846,10 @@ function panelAct(a,v){const pg=P.pages[cur];const L=sel&&sel.L;
  case 'vary':L.seed=1+Math.floor(Math.random()*1e9);if(PAL[L.type])L.color=PAL[L.type][Math.floor(Math.random()*PAL[L.type].length)];break;
  case 'pat':L.pat=v;break;
  case 'add':addCollage(v);return;
- case 'texr':{const ks=TEXK.map(k=>k[0]).filter(k=>!pg.tex||k!=pg.tex.kind);pg.tex={kind:ks[Math.floor(Math.random()*ks.length)],seed:1+Math.floor(Math.random()*1e9),amt:pg.tex?pg.tex.amt:.45};break;}
- case 'texk':pg.tex=v=='none'?null:{kind:v,seed:(pg.tex&&pg.tex.seed)||1+Math.floor(Math.random()*1e9),amt:pg.tex?pg.tex.amt:.45};break;}
+ case 'texup':case 'texdown':{const n=pg.layers.length;let z=texZ(pg);z=a=='texup'?Math.min(n,z+1):Math.max(-1,z-1);pg.tex.z=z>=n?null:z;break;}
+ case 'pickimg':$('fImg').click();return;case 'pasteimg':pasteFromClipboard();return;
+ case 'texr':{const ks=TEXK.map(k=>k[0]).filter(k=>!pg.tex||k!=pg.tex.kind);pg.tex={kind:ks[Math.floor(Math.random()*ks.length)],seed:1+Math.floor(Math.random()*1e9),amt:pg.tex?pg.tex.amt:.45,z:pg.tex?pg.tex.z:null};break;}
+ case 'texk':pg.tex=v=='none'?null:{kind:v,seed:(pg.tex&&pg.tex.seed)||1+Math.floor(Math.random()*1e9),amt:pg.tex?pg.tex.amt:.45,z:pg.tex?pg.tex.z:null};break;}
  refreshAll();}
 function toggleSpread(){const k=spKey(cur);if(sel.own=='p'){const i=pg().layers.indexOf(sel.L);pg().layers.splice(i,1);const L=toSp(sel.L,spHalf(cur));P.spreads[k]=P.spreads[k]||{layers:[]};fillL(L,'s','fill');P.spreads[k].layers.push(L);sel={own:'s',L};status('התמונה פרושה על שני העמודים – התוכן של '+label(partner(cur))+' נשאר מעליה');}
  else{const arr=P.spreads[k].layers;arr.splice(arr.indexOf(sel.L),1);if(!arr.length)delete P.spreads[k];const L=fromSp(sel.L,spHalf(cur));pg().layers.unshift(L);sel={own:'p',L};}
@@ -856,7 +873,7 @@ function newEl(type,r){const pick=a=>a[Math.floor(r()*a.length)];const seed=1+Ma
  if(type=='washi'){e.w=S*2;e.h=S*.4;e.color=pick(PAL.washi);e.pat=pick(['stripes','dots','grid','plain']);e.ends=r()<.5?'zig':'torn';}
  if(type=='masking'){e.w=S*1.7;e.h=S*.35;}return e;}
 function addCollage(t){const r=rng((Date.now()^Math.random()*1e9)>>>0);if(t=='rand')t=['washi','washi','masking','strip','sticky'][Math.floor(r()*5)];const e=newEl(t,r);P.pages[cur].layers.push(e);sel={own:'p',L:e};refreshAll();}
-$('tImg').onclick=()=>$('fImg').click();$('fImg').onchange=e=>{addImageFiles([...e.target.files]);e.target.value='';};
+$('tImg').onclick=()=>{sel=null;setTool('img');};$('fImg').onchange=e=>{addImageFiles([...e.target.files]);e.target.value='';};
 $('tTxt').onclick=addText;$('tCol').onclick=()=>{sel=null;setTool('col');};$('tTex').onclick=()=>{sel=null;setTool('tex');};$('tDraw').onclick=()=>setTool('draw');
 $('bulk').onclick=()=>$('fBulk').click();$('fBulk').onchange=async e=>{const fs=[...e.target.files].filter(f=>f.type.startsWith('image/')).sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));for(let k=0;k<fs.length&&k<N();k++)await addImageSrc(await readFile(fs[k]),{page:k,fill:true});e.target.value='';sel=null;refreshAll();};
 // ===================== pages: duplicate / copy / paste =====================
@@ -877,6 +894,14 @@ document.addEventListener('paste',e=>{if(isTyping())return;const items=[...(e.cl
  e.preventDefault();if(files.length){addImageFiles(files);return;}
  const html=e.clipboardData&&e.clipboardData.getData('text/html');const m=html&&html.match(/<img[^>]+src="(data:image[^"]+)"/);if(m){addImageSrc(m[1]);return;}
  if(lastClip=='layer'&&layerClip){const c=clone(layerClip);c.id=nid();c.x=Math.min(.95,c.x+.03);c.y=Math.min(.95,c.y+.03);P.pages[cur].layers.push(c);sel={own:'p',L:c};refreshAll();}else pastePage();});
+
+function texPosName(pg){const z=texZ(pg),n=pg.layers.length;return z>=n?'מעל הכול':z<0?'מאחורי הכול':z==0?'מתחת לכל הפריטים, מעל הרקע':'בין הפריטים ('+z+' מתחת לה)';}
+function toast(m){status(m);let t=$('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#333d;color:#fff;padding:10px 16px;border-radius:10px;z-index:99;font-size:14px;max-width:90vw;text-align:center;pointer-events:none;transition:opacity .3s';document.body.appendChild(t);}
+ t.textContent=m;t.style.opacity=1;clearTimeout(t._h);t._h=setTimeout(()=>t.style.opacity=0,3500);}
+async function pasteFromClipboard(){if(!navigator.clipboard||!navigator.clipboard.read){toast('הדפדפן הזה לא מאפשר הדבקה מהכפתור. נסו Ctrl+V, או לחיצה ארוכה ← הדבקה.');return;}
+ try{const items=await navigator.clipboard.read();for(const it of items){const ty=it.types.find(t=>t.startsWith('image/'));if(ty){const b=await it.getType(ty);await addImageSrc(await readFile(b));toast('התמונה הודבקה');return;}}
+  toast('אין תמונה בלוח. העתיקו תמונה ונסו שוב.');}
+ catch(e){toast(e&&e.name=='NotAllowedError'?'אין הרשאה לקרוא מהלוח. אשרו גישה ללוח בדפדפן ונסו שוב.':'לא הצלחתי להדביק: '+(e&&e.message||e));}}
 
 // ===================== migration (v1 -> v2) =====================
 function migrate(p){if(p&&p.v==2){ensureIds(p);return p;}const q={v:2,mode:+(p&&p.mode)||8,dir:(p&&p.dir)||'rtl',layout16:p&&p.layout16,pages:[],spreads:{}};
