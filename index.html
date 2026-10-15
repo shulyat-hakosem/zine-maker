@@ -47,7 +47,9 @@ textarea{width:100%;direction:rtl;font-size:15px}
 .del{background:#c33!important;color:#fff!important;border-color:#c33!important}
 .modalBg{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:20}.modalBg.on{display:flex}
 .dlBox{background:#fffaf0;color:#222;padding:14px 18px;border-radius:8px;width:min(92vw,420px);box-shadow:0 6px 20px #0006}
-.dlA{display:inline-block;background:#c8553d;color:#fff!important;padding:8px 14px;border-radius:6px;text-decoration:none;font-weight:bold;margin:6px 0}
+.dlA{display:inline-block;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:bold;margin:6px 0;font-size:15px;cursor:pointer}
+.pri,.dlA,body.craft .pri,body.craft .dlA,body.craft header button.pri{background:#c8553d!important;color:#fff!important;border:1px solid #a8432f!important;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.pri:hover,.dlA:hover{background:#b3452f!important}
 #help{background:#fff;max-width:700px;width:92vw;max-height:88vh;overflow:auto;padding:12px 18px;border-radius:8px;position:relative}
 #help h2{margin-top:0}
 /* ---- craft workbench theme ---- */
@@ -105,7 +107,7 @@ body.craft .lbl{color:#6b5a44}
 <div id="panel"></div>
 </main>
 <div id="dlModal" class="modalBg"><div class="dlBox"><b>הדפסה – PDF</b>
-<div id="dlOpts"><div class="row">קווי עזר לקיפול: <select id="gsel"><option value="solid">קו דק</option><option value="dashed">מקווקו</option><option value="none">בלי קווים</option></select></div><button id="dlGo" class="dlA" style="border:0;cursor:pointer">צור PDF</button></div>
+<div id="dlOpts"><div class="row">קווי עזר לקיפול: <select id="gsel"><option value="solid">קו דק</option><option value="dashed">מקווקו</option><option value="none">בלי קווים</option></select></div><button id="dlGo" class="dlA">🖨 צור PDF להדפסה</button></div>
 <p id="dlMsg"></p>
 <div id="dlProg" style="height:8px;background:#ddd;border-radius:4px;overflow:hidden"><div id="dlBar" style="height:100%;width:0;background:#c8553d"></div></div>
 <div id="dlBtns"><a id="dlLink" class="dlA">⬇ הורד PDF</a> <button id="dlShare">📤 שיתוף</button> <button id="dlOpen">פתח בלשונית</button></div>
