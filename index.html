@@ -27,7 +27,7 @@ main{flex:1;min-height:0;display:flex;gap:8px;padding:8px}
 #gridWrap{flex:1 1 28%;min-width:0;background:#fff;border-radius:6px;padding:6px;overflow:auto;display:flex;flex-direction:column}
 #pageBar{display:flex;gap:4px;justify-content:center;margin-bottom:4px;flex-wrap:wrap}#pageBar button{font-size:12px;padding:3px 7px}
 #grid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-content:flex-start;flex:1;min-height:0}
-.pair{display:flex;gap:2px;margin:0 3px}.pair.linked{gap:0;outline:2px solid #4a7;outline-offset:1px}
+.pair{display:flex;gap:2px;margin:0 3px}.pair.linked{gap:0;outline:2px solid #4a7;outline-offset:1px;position:relative}.pair.linked::before{content:'🔗 תמונה כפולה';position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#4a7;color:#fff;font-size:10px;line-height:14px;padding:0 6px;border-radius:8px;z-index:2;white-space:nowrap;pointer-events:none}
 .thumb{padding:2px;border:2px solid transparent;cursor:pointer;text-align:center;font-size:11px;line-height:14px}
 .thumb.sel{border-color:#d33}.thumb canvas{display:block;box-shadow:0 1px 3px #0005}
 .drop{outline:3px dashed #d33}
@@ -77,23 +77,26 @@ body.craft details.menu .pop{background:#fbf7ee}
 
 body.craft #panel h3{color:#4a3826}
 body.craft .lbl{color:#6b5a44}
-@media (max-width:800px){html{overflow:auto;height:auto}body{overflow:visible;height:auto}main{flex-direction:column}#panel{flex:none}#edWrap{flex:none;height:64vh;scroll-margin-top:48px}#gridWrap{max-height:36vh}header{flex-wrap:wrap;position:sticky;top:0;z-index:20;gap:4px!important;padding:4px 6px!important}.tb .lb{font-size:9px}.tb .ic{font-size:16px}.tb{min-width:0;flex:1;padding:2px 1px}#status{display:none}#mode{width:58px}details.menu summary{padding:4px}header h1{display:none}}
+@media (max-width:800px){#panel{overflow:visible;flex:none!important}#elSec{overflow:visible;flex:none;min-height:auto}#bgSec{flex:none}#gridWrap{order:1}#edWrap{order:2}#panel{order:3}html{overflow:auto;height:auto}body{overflow:visible;height:auto}main{flex-direction:column}#panel{flex:none}#edWrap{flex:none;height:64vh;scroll-margin-top:48px}#gridWrap{max-height:36vh}header{flex-wrap:wrap;position:sticky;top:0;z-index:20;gap:4px!important;padding:4px 6px!important}.tb .lb{font-size:9px}.tb .ic{font-size:16px}.tb{min-width:0;flex:1;padding:2px 1px}#status{display:none}#mode{width:58px}details.menu summary{padding:4px}header h1{display:none}}
 .ur:disabled{opacity:.35}.sw button{min-width:44px;border:1px solid #998!important}.sw button.on{outline:3px solid #c8553d;outline-offset:1px}
 #lstrip{margin-top:10px;border-top:1px dashed #b9a683;padding-top:6px}.lrow{display:flex;align-items:center;gap:6px;padding:3px 4px;border-radius:5px;cursor:pointer;font-size:13px;border:1px solid transparent}
 .lrow.on{background:#e8dcc2;border-color:#5a4632}.lrow .nm{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.lrow img,.lrow .ico{width:26px;height:26px;object-fit:cover;border-radius:3px;background:#fff;border:1px solid #ccb;display:inline-flex;align-items:center;justify-content:center;font-size:15px}
 .lrow button{padding:2px 8px;font-size:13px}
+#panel{flex:0 0 300px;padding:0;display:flex;flex-direction:column;overflow:hidden}#elSec{padding:8px 10px;flex:1 1 auto;overflow:auto;min-height:0}
+.ptabs{display:flex;gap:3px;margin:-2px -4px 8px;border-bottom:2px solid #5a4632;padding-bottom:0}.ptabs button{flex:1;border-radius:7px 7px 0 0!important;border-bottom:0!important;padding:5px 2px;font-size:12.5px;display:flex;flex-direction:column;align-items:center;line-height:1.1}.ptabs button .ic{font-size:17px}
+.addb{flex:1;font-size:14px;font-weight:bold}.selbox{border:1px solid #c9b895;border-radius:7px;padding:6px 8px;margin:6px 0;background:rgba(255,255,255,.55)}
+.clip{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:8px 0 2px}.clip .lbl{margin:0}.clip button{font-size:12.5px;padding:3px 7px}button:disabled{opacity:.4;cursor:default}
+#bgSec{flex:0 0 auto;margin:0;padding:8px 10px 10px;background:#e7eef2!important;background-image:none!important;border-top:3px double #7b93a3;border-radius:0 0 6px 6px}#bgSec h3{color:#2f4a5c!important;margin-bottom:2px}#bgSec .lbl{color:#4b6474!important}
+button.small{font-size:12px;padding:2px 7px}.cropbox{border:2px dashed #e8590c;border-radius:7px;padding:6px 8px;margin:6px 0;background:#fff4ec}
+#panel h3{font-size:14px}
+@media (max-width:800px){#panel{overflow:visible;flex:none;scroll-margin-top:48px}#elSec{overflow:visible;flex:none}#bgSec{flex:none}}
 </style></head><body>
 <header><h1>✂️ יוצר פאנזינים</h1>
-<select id="mode" title="מספר עמודים"><option value="8">8 עמ׳</option><option value="16">16 עמ׳</option></select>
-<button class="tb" id="tImg" title="הוספת תמונה (אפשר כמה, או Ctrl+V)"><span class="ic">🖼</span><span class="lb">תמונה</span></button>
-<button class="tb" id="tTxt" title="הוספת טקסט"><span class="ic">🔤</span><span class="lb">טקסט</span></button>
-<button class="tb" id="tCol" title="פתקים, נייר דבק ורצועות"><span class="ic">✂️</span><span class="lb">קולאז׳</span></button>
-<button class="tb" id="tTex" title="טקסטורת נייר לעמוד"><span class="ic">🧻</span><span class="lb">טקסטורה</span></button>
-<button class="tb" id="tDraw" title="ציור חופשי"><span class="ic">✏️</span><span class="lb">ציור</span></button>
 <button class="tb ur" id="undoB" title="ביטול (Ctrl+Z)"><span class="ic">↶</span><span class="lb">ביטול</span></button><button class="tb ur" id="redoB" title="חזרה (Ctrl+Shift+Z / Ctrl+Y)"><span class="ic">↷</span><span class="lb">חזרה</span></button>
 <button class="tb pri" id="pdf" title="PDF להדפסה"><span class="ic">🖨</span><span class="lb">הדפסה</span></button>
 <button class="tb" id="helpBtn" title="הוראות קיפול"><span class="ic">❓</span><span class="lb">קיפול</span></button>
 <details class="menu"><summary title="הגדרות">⚙️</summary><div class="pop">
+<label>מספר עמודים: <select id="mode" title="מספר עמודים"><option value="8">8 עמ׳</option><option value="16">16 עמ׳</option></select></label>
 <label id="lay16L">פריסת 16: <select id="lay16"><option value="loop">דף אחד חד-צדדי, 4×4 עם חריצים</option><option value="octavo">דף אחד דו-צדדי, בלי גזירה</option><option value="one">דף אחד, שני חצאים</option><option value="booklet">חוברת מהודקת, 2 דפים</option></select></label>
 <label>כיוון: <select id="dir"><option value="rtl">עברית (שדרה מימין)</option><option value="ltr">לועזית (שדרה משמאל)</option></select></label>
 <label id="flipL">דו-צדדי: <select id="flip"><option value="short">היפוך בצד הקצר</option><option value="long">היפוך בצד הארוך</option></select></label>
@@ -107,9 +110,9 @@ body.craft .lbl{color:#6b5a44}
 <input type="file" id="fImg" accept="image/*" multiple hidden><input type="file" id="fBulk" accept="image/*" multiple hidden><input type="file" id="fImp" accept=".json" hidden>
 </header>
 <main>
-<div id="gridWrap"><div id="pageBar"><button id="pageOpts" title="צבע הדף וסדר השכבות">🎨 צבע ושכבות</button><button id="dupP" title="עותק של העמוד אחריו">📄 שכפול עמוד</button><button id="copyP">העתק עמוד</button><button id="pasteP">הדבק עמוד</button></div><div id="grid"></div></div>
-<div id="edWrap"><b id="edTitle"></b><div id="edBox"><canvas id="ed"></canvas></div></div>
 <div id="panel"></div>
+<div id="edWrap"><b id="edTitle"></b><div id="edBox"><canvas id="ed"></canvas></div></div>
+<div id="gridWrap"><div id="pageBar"><button id="pageOpts" title="צבע וטקסטורה של הדף">🎨 רקע הדף</button><button id="dupP" title="עותק של העמוד אחריו">📄 שכפול עמוד</button><button id="copyP">העתק עמוד</button><button id="pasteP">הדבק עמוד</button></div><div id="grid"></div></div>
 </main>
 <div id="dlModal" class="modalBg"><div class="dlBox"><b>הדפסה – PDF</b>
 <div id="dlOpts"><div class="row">קווי עזר לקיפול: <select id="gsel"><option value="solid">קו דק</option><option value="dashed">מקווקו</option><option value="none">בלי קווים</option></select></div><button id="dlGo" class="dlA">🖨 צור PDF להדפסה</button></div>
@@ -711,9 +714,29 @@ function boxPx(L,W,H){if(L.type=='image')return[L.w*W,L.w*W*ar(L)];
 function drawStrokes(ctx,L,W,H){const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.lineCap=x.lineJoin='round';
  (L.strokes||[]).forEach(s=>{x.globalCompositeOperation=s.er?'destination-out':'source-over';x.strokeStyle=s.c;x.lineWidth=s.w*W;x.beginPath();s.p.forEach(([a,b],i)=>i?x.lineTo(a*W,b*H):x.moveTo(a*W,b*H));if(s.p.length==1)x.lineTo(s.p[0][0]*W+0.01,s.p[0][1]*H);x.stroke();});
  ctx.drawImage(c,0,0);c.width=0;}
+// ----- crop masks (normalized to the element box, 0..1) -----
+function maskUnit(m){const q=m.q||0;const rot=([s,t])=>{for(let k=0;k<q;k++)[s,t]=[1-t,s];return[s,t];};
+ if(m.k=='rect')return[[0,0],[1,0],[1,1],[0,1]];
+ if(m.k=='ellipse'){const a=[];for(let i=0;i<72;i++){const t=i/72*Math.PI*2;a.push([.5+.5*Math.cos(t),.5+.5*Math.sin(t)]);}return a;}
+ if(m.k=='tri')return[[.5,0],[1,1],[0,1]].map(rot);
+ if(m.k=='diag')return[[0,0],[1,0],[1,1]].map(rot);return[];}
+function maskNorm(m){if(m.k=='poly')return m.pts||[];return maskUnit(m).map(([s,t])=>[m.x-m.w/2+s*m.w,m.y-m.h/2+t*m.h]);}
+function maskPoly(m,bw,bh){return maskNorm(m).map(([a,b])=>[(a-.5)*bw,(b-.5)*bh]);}
+function maskBBox(m){const p=maskNorm(m);if(!p.length)return[0,0,1,1];let a=[1e9,1e9,-1e9,-1e9];p.forEach(([x,y])=>{a=[Math.min(a[0],x),Math.min(a[1],y),Math.max(a[2],x),Math.max(a[3],y)];});return a;}
+// rough edge that follows any polygon outline, offset inward
+function roughPoly(poly,u,kind,r,extra){const n0=poly.length;if(n0<3)return poly;let s=0;for(let i=0;i<n0;i++){const [x1,y1]=poly[i],[x2,y2]=poly[(i+1)%n0];s+=x1*y2-x2*y1;}
+ let bx=[1e9,1e9,-1e9,-1e9];poly.forEach(([x,y])=>{bx=[Math.min(bx[0],x),Math.min(bx[1],y),Math.max(bx[2],x),Math.max(bx[3],y)];});const mx=Math.min(bx[2]-bx[0],bx[3]-bx[1])*.04;
+ const out=[];let walk=r()*3,kk=0;const curved=n0>12;let cw=r()*mx*.5;
+ for(let i=0;i<n0;i++){const [x1,y1]=poly[i],[x2,y2]=poly[(i+1)%n0];const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy)||1;const nx=(s>0?-dy:dy)/L,ny=(s>0?dx:-dx)/L;let n,off;
+  if(kind=='cut'){if(curved){n=1;off=()=>{cw+=(r()-.5)*mx*.15;cw=Math.max(0,Math.min(mx*.6,cw));return cw;};}else{n=1+Math.floor(r()*2);const a=r()*mx,b=r()*mx;off=t=>a+(b-a)*t+(n>1&&t>0?r()*mx*.5:0);}}
+  else if(kind=='zigzag'){n=Math.max(1,Math.round(L/(7*u)));off=()=>(kk++%2?3.2*u:0.4*u);}
+  else{n=Math.max(1,Math.round(L/(2.2*u)));off=()=>{walk+=(r()-.5)*2.2;walk=Math.max(.3,Math.min(6,walk));return walk*u+(r()<.08?r()*3*u:0);};}
+  for(let k=0;k<n;k++){const t=k/n;const d=off(t)+extra*u;out.push([x1+dx*t+nx*d,y1+dy*t+ny*d]);}}
+ return out;}
 function drawLayer(ctx,L,W,H){if(L.type=='draw'){drawStrokes(ctx,L,W,H);return;}
  ctx.save();ctx.translate(L.x*W,L.y*H);ctx.rotate((L.rot||0)*Math.PI/180);ctx.globalAlpha=L.op??1;const [bw,bh]=boxPx(L,W,H),u=W/1000;
- try{if(L.edge&&L.edge!='none'&&L.type!='text'){const r=rng(L.eseed||1);if(L.edge=='torn'){const out=edgePoly(bw,bh,u,'torn',r,0),inn=edgePoly(bw,bh,u,'torn',r,2.2);ctx.save();polyPath(ctx,out);ctx.fillStyle='rgba(255,253,246,.97)';ctx.fill();ctx.restore();polyPath(ctx,inn);}else polyPath(ctx,edgePoly(bw,bh,u,L.edge,r,0));ctx.clip();}
+ try{const mk=L.mask&&L.type!='text'&&L.type!='draw'?maskPoly(L.mask,bw,bh):null;const E=L.type=='text'?'none':(L.edge||'none');
+  if(E!='none'||mk){const r=rng(L.eseed||1);const gp=(k,ex)=>mk?roughPoly(mk,u,k,r,ex):edgePoly(bw,bh,u,k,r,ex);if(E=='torn'){const out=gp('torn',0),inn=gp('torn',2.2);ctx.save();polyPath(ctx,out);ctx.fillStyle='rgba(255,253,246,.97)';ctx.fill();ctx.restore();polyPath(ctx,inn);}else if(E=='none')polyPath(ctx,mk);else polyPath(ctx,gp(E,0));ctx.clip();}
   if(L.type=='image'){const s=processed(L);if(s)ctx.drawImage(s,-bw/2,-bh/2,bw,bh);}
   else if(L.type=='text'){const fs=L.size*H;ctx.font=fontStr(L,H);ctx.direction='rtl';const al=L.align||'center';ctx.textAlign=al;const tx=al=='right'?bw/2-fs*.25:al=='left'?-bw/2+fs*.25:0;ctx.textBaseline='middle';const ls=(L.text||'').split('\n'),lh=fs*1.25;const y0=-(ls.length-1)*lh/2;
    if(L.bgOn){ctx.fillStyle=L.bg||'#fff';ctx.fillRect(-bw/2,-bh/2,bw,bh);}ctx.fillStyle=L.color||'#111';ls.forEach((s,k)=>ctx.fillText(s,tx,y0+k*lh));}
@@ -737,18 +760,18 @@ function fillL(L,own,mode){const A=frameAspect(own),a=ar(L);L.x=.5;L.y=.5;L.rot=
 function thumbW(){const gw=$('grid'),n=N(),[w,h]=pageMM(),W=gw.clientWidth-10,H=gw.clientHeight-6;let best=40;
  const units=[1];for(let i=1;i<n-1;i+=2)units.push(2);units.push(1);for(let c=2;c<=n;c++){let r=1,u0=0;for(const u of units){if(u0+u>c){r++;u0=0;}u0+=u;}const tw=Math.min((W-c*12)/c-6,((H-r*8)/r-28)*w/h);if(tw>best)best=tw;}return Math.floor(Math.min(best,220));}
 function refreshGrid(){const g=$('grid');g.innerHTML='';const TW=thumbW();const [w,h]=pageMM();let grp=null;
- P.pages.forEach((pg,i)=>{if(i==0||i==N()-1||i%2){grp=document.createElement('div');grp.className='pair'+(spLayers(i)&&i!=0&&i!=N()-1?' linked':'');grp.style.direction=rtl()?'rtl':'ltr';g.appendChild(grp);}
+ P.pages.forEach((pg,i)=>{if(i==0||i==N()-1||i%2){grp=document.createElement('div');grp.className='pair'+(spLayers(i)&&i!=0&&i!=N()-1?' linked':'');grp.style.direction=rtl()?'rtl':'ltr';if(grp.classList.contains('linked'))grp.title='המסגרת הירוקה = תמונה אחת פרושה על שני העמודים האלה (כפולה)';g.appendChild(grp);}
   const d=document.createElement('div');d.className='thumb'+(i==cur?' sel':'');const c=renderPage(i,Math.round(TW*1.5),Math.round(TW*1.5*h/w));c.style.width=TW+'px';d.appendChild(c);d.append((spLayers(i)?'🔗 ':'')+label(i));
   d.onclick=()=>{cur=i;sel=null;refreshAll();};d.ondragover=e=>{e.preventDefault();d.classList.add('drop')};d.ondragleave=()=>d.classList.remove('drop');
   d.ondrop=e=>{e.preventDefault();d.classList.remove('drop');cur=i;sel=null;addImageFiles([...e.dataTransfer.files]);};grp.appendChild(d);});}
-let rt,rs;function refreshAll(){refreshEditor();renderPanel();clearTimeout(rt);rt=setTimeout(()=>{refreshGrid();autosave();},150);}
+let rt,rs;function refreshAll(){try{histPush();}catch(e){}refreshEditor();renderPanel();clearTimeout(rt);rt=setTimeout(()=>{refreshGrid();autosave();},150);}
 function refreshSoon(){clearTimeout(rs);rs=setTimeout(refreshAll,60);}
 
 // ===================== editor & direct manipulation =====================
 const ed=$('ed');let EW=400,EH=560,DPR=1;
 function refreshEditor(){const [w,h]=pageMM();const bx=$('edBox');const ch=Math.max(100,bx.clientHeight-6),cw=Math.max(80,bx.clientWidth-6);const ew=Math.min(cw,ch*w/h);
  DPR=Math.min(2,devicePixelRatio||1);ed.style.width=ew+'px';ed.style.height=(ew*h/w)+'px';EW=ed.width=Math.round(ew*DPR);EH=ed.height=Math.round(ew*h/w*DPR);
- const x=ed.getContext('2d');paintPage(x,cur,EW,EH,{safe:true});if(sel&&!layerAlive(sel))sel=null;if(sel&&tool!='draw')drawHandles(x);
+ const x=ed.getContext('2d');paintPage(x,cur,EW,EH,{safe:true});if(sel&&!layerAlive(sel))sel=null;if(crop&&!(sel&&sel.L===crop.L))crop=null;if(crop)drawCrop(x);else if(sel&&tool!='draw')drawHandles(x);
  $('edTitle').textContent=label(cur)+(spLayers(cur)?' · 🔗 כפולה עם '+label(partner(cur)):'');ed.classList.toggle('draw',tool=='draw');}
 function ownerArr(s){return s.own=='s'?(P.spreads[spKey(cur)]||{layers:[]}).layers:P.pages[cur].layers;}
 function layerAlive(s){return ownerArr(s).includes(s.L);}
@@ -764,13 +787,14 @@ function drawHandles(x){const g=geom(sel),H=handles(g);x.save();x.translate(g.cx
  x.fillStyle='#c33';x.beginPath();x.arc(H.del[0],H.del[1],9*DPR,0,7);x.fill();x.fillStyle='#fff';x.font='bold '+(12*DPR)+'px sans-serif';x.fillText('✕',H.del[0],H.del[1]+DPR);}
 function hitTest(px,py){const pad=6*DPR;const cand=[];const pl=P.pages[cur].layers;for(let i=pl.length-1;i>=0;i--)if(pl[i].type!='draw')cand.push({own:'p',L:pl[i]});
  const sl=spLayers(cur);if(sl)for(let i=sl.length-1;i>=0;i--)cand.push({own:'s',L:sl[i]});
- for(const s of cand){const g=geom(s);const [lx,ly]=toLocal(g,px,py);if(Math.abs(lx)<=g.bw/2+pad&&Math.abs(ly)<=g.bh/2+pad)return s;}return null;}
+ for(const s of cand){const g=geom(s);const [lx,ly]=toLocal(g,px,py);if(s.L.mask&&s.L.type!='text'){const b=maskBBox(s.L.mask),nu=lx/g.bw+.5,nv=ly/g.bh+.5,pu=pad/g.bw,pv=pad/g.bh;if(nu>=b[0]-pu&&nu<=b[2]+pu&&nv>=b[1]-pv&&nv<=b[3]+pv)return s;continue;}if(Math.abs(lx)<=g.bw/2+pad&&Math.abs(ly)<=g.bh/2+pad)return s;}return null;}
 function sizeGet(L){return L.type=='text'?L.size:L.w;}
 function sizeSet(L,v,st){if(L.type=='text')L.size=clamp(v,.01,.8);else{const k=v/st.w;L.w=clamp(v,.01,8);if(st.h!=null)L.h=st.h*k;}}
 let act=null;const ptrs=new Map();
 function evPt(e){const r=ed.getBoundingClientRect();return[(e.clientX-r.left)*EW/r.width,(e.clientY-r.top)*EH/r.height];}
 ed.addEventListener('pointerdown',e=>{ed.setPointerCapture(e.pointerId);const p=evPt(e);ptrs.set(e.pointerId,p);
  if(tool=='draw'){if(ptrs.size==1)startStroke(p);return;}
+ if(crop){if(ptrs.size==1)cropDown(p,e);return;}
  if(ptrs.size==2){if(sel){const a=[...ptrs.values()];act={k:'pinch',d0:Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])||1,a0:Math.atan2(a[1][1]-a[0][1],a[1][0]-a[0][0]),s0:sizeGet(sel.L),st:{w:sel.L.w,h:sel.L.h},r0:sel.L.rot||0};}return;}
  if(sel){const g=geom(sel),H=handles(g),R=14*DPR;const near=q=>Math.hypot(q[0]-p[0],q[1]-p[1])<R;
   if(near(H.del)){delSel();return;}
@@ -784,6 +808,7 @@ let fling=0;function flingGo(v){cancelAnimationFrame(fling);const step=()=>{if(M
 ed.addEventListener('pointerdown',()=>cancelAnimationFrame(fling),true);
 ed.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;const p=evPt(e);ptrs.set(e.pointerId,p);
  if(tool=='draw'){if(ptrs.size==1)moveStroke(p);return;}
+ if(act&&cropMove(p,e))return;
  if(act&&act.k=='pan'){if(ptrs.size>1)return;const dy=e.clientY-act.cy0,dx=e.clientX-act.cx0;if(Math.hypot(dx,dy)>8)act.moved=true;if(act.moved){scrollTo(scrollX,act.sy-dy);const t=performance.now();act.v=(e.clientY-act.ly)/Math.max(1,t-act.t);act.t=t;act.ly=e.clientY;}return;}
  if(!act||!sel)return;const L=sel.L;
  if(act.k=='pinch'&&ptrs.size>=2){const a=[...ptrs.values()];const d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]),an=Math.atan2(a[1][1]-a[0][1],a[1][0]-a[0][0]);sizeSet(L,act.s0*d/act.d0,act.st);L.rot=snap(act.r0+(an-act.a0)*180/Math.PI);}
@@ -793,6 +818,8 @@ ed.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;const p=e
  refreshEditor();});
 function snap(r){r=((r%360)+540)%360-180;for(const s of[-180,-90,0,90,180])if(Math.abs(r-s)<3)return s;return r;}
 function pend(e){ptrs.delete(e.pointerId);if(tool=='draw'){endStroke();return;}
+ if(act&&act.k=='ctap'){const a=act;act=null;if(!a.moved&&e.type=='pointerup')cropTap(a);return;}
+ if(act&&(act.k=='mmove'||act.k=='mres')){act=null;refreshAll();return;}
  if(act&&act.k=='pan'){const a=act;act=null;if(!a.moved&&e.type=='pointerup'){sel=a.hit;renderPanel();refreshEditor();}else if(a.moved&&performance.now()-a.t<80)flingGo(a.v);return;}if(act&&(act.k!='pinch'||ptrs.size<2)){act=null;refreshAll();}}
 ed.addEventListener('pointerup',pend);ed.addEventListener('pointercancel',pend);
 ed.addEventListener('wheel',e=>{if(!sel)return;e.preventDefault();const st={w:sel.L.w,h:sel.L.h};sizeSet(sel.L,sizeGet(sel.L)*(e.deltaY<0?1.05:1/1.05),st);refreshAll();},{passive:false});
@@ -805,38 +832,85 @@ function startStroke(p){const L=drawLayerOf(P.pages[cur]);stroke={p:[[p[0]/EW,p[
 function moveStroke(p){if(!stroke)return;stroke.p.push([+(p[0]/EW).toFixed(4),+(p[1]/EH).toFixed(4)]);refreshEditor();}
 function endStroke(){if(stroke){stroke=null;refreshAll();}}
 
+// ----- crop / mask editing -----
+let crop=null;
+function cropNorm(p){const g=geom({own:crop.own,L:crop.L});const [lx,ly]=toLocal(g,p[0],p[1]);return[lx/g.bw+.5,ly/g.bh+.5,g];}
+function cropDown(p,e){const [nu,nv,g]=cropNorm(p);const base={cx0:e.clientX,cy0:e.clientY,sy:scrollY,moved:false,t:performance.now(),ly:e.clientY,v:0};
+ if(crop.mode=='pts'){act={k:'ctap',nu,nv,...base};return;}
+ const m=crop.L.mask;if(m&&m.k!='poly'){const R=16*DPR;const cs=[[-1,-1],[1,-1],[1,1],[-1,1]];
+  for(const [a,b] of cs){const cu=m.x+a*m.w/2,cv=m.y+b*m.h/2;if(Math.hypot((cu-nu)*g.bw,(cv-nv)*g.bh)<R){act={k:'mres',fu:m.x-a*m.w/2,fv:m.y-b*m.h/2};return;}}
+  if(Math.abs(nu-m.x)<=m.w/2&&Math.abs(nv-m.y)<=m.h/2){act={k:'mmove',nu0:nu,nv0:nv,x0:m.x,y0:m.y};return;}}
+ else if(m&&m.k=='poly'){const b=maskBBox(m);if(nu>=b[0]&&nu<=b[2]&&nv>=b[1]&&nv<=b[3]){act={k:'mmove',nu0:nu,nv0:nv,pts0:m.pts.map(q=>q.slice())};return;}}
+ act=e.pointerType=='touch'?{k:'pan',hit:sel,cy0:e.clientY,cx0:e.clientX,sy:scrollY,moved:false,v:0,t:performance.now(),ly:e.clientY}:null;}
+function cropMove(p,e){if(!crop)return false;const m=crop.L.mask;
+ if(act.k=='ctap'){const dy=e.clientY-act.cy0,dx=e.clientX-act.cx0;if(Math.hypot(dx,dy)>8)act.moved=true;if(act.moved&&e.pointerType=='touch')scrollTo(scrollX,act.sy-dy);return true;}
+ if(act.k=='mmove'){const [nu,nv]=cropNorm(p);if(act.pts0)m.pts=act.pts0.map(([a,b])=>[a+nu-act.nu0,b+nv-act.nv0]);else{m.x=clamp(act.x0+nu-act.nu0,-.2,1.2);m.y=clamp(act.y0+nv-act.nv0,-.2,1.2);}refreshEditor();return true;}
+ if(act.k=='mres'){const [nu,nv]=cropNorm(p);m.x=(act.fu+nu)/2;m.y=(act.fv+nv)/2;m.w=Math.max(.04,Math.abs(nu-act.fu));m.h=Math.max(.04,Math.abs(nv-act.fv));refreshEditor();return true;}
+ return false;}
+function cropTap(a){const pts=crop.pts;const g=geom({own:crop.own,L:crop.L});
+ if(pts.length>=3&&Math.hypot((pts[0][0]-a.nu)*g.bw,(pts[0][1]-a.nv)*g.bh)<18*DPR){closePts();return;}
+ pts.push([+a.nu.toFixed(4),+a.nv.toFixed(4)]);refreshEditor();renderPanel();}
+function closePts(){if(crop.pts.length<3)return;crop.L.mask={k:'poly',pts:crop.pts.slice()};crop.pts=[];crop.mode='shape';refreshAll();}
+function drawCrop(x){const s={own:crop.own,L:crop.L},g=geom(s),L=crop.L;x.save();x.translate(g.cx,g.cy);x.rotate(g.a);
+ // ghost of the whole element so you can see what is cut away
+ x.globalAlpha=.3;if(L.type=='image'){const im=processed(L);if(im)x.drawImage(im,-g.bw/2,-g.bh/2,g.bw,g.bh);}else if(EL[L.type])EL[L.type](x,g.bw,g.bh,rng(L.seed||1),L,EW/1000);x.globalAlpha=1;
+ x.strokeStyle='#888';x.lineWidth=1*DPR;x.setLineDash([3*DPR,3*DPR]);x.strokeRect(-g.bw/2,-g.bh/2,g.bw,g.bh);
+ x.strokeStyle='#e8590c';x.lineWidth=2.5*DPR;x.setLineDash([7*DPR,4*DPR]);
+ if(L.mask){polyPath(x,maskPoly(L.mask,g.bw,g.bh));x.stroke();}x.setLineDash([]);
+ const hs=9*DPR;x.fillStyle='#fff';
+ if(L.mask&&L.mask.k!='poly'&&crop.mode!='pts'){const m=L.mask;[[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([a,b])=>{const px=(m.x+a*m.w/2-.5)*g.bw,py=(m.y+b*m.h/2-.5)*g.bh;x.fillRect(px-hs/2,py-hs/2,hs,hs);x.strokeRect(px-hs/2,py-hs/2,hs,hs);});}
+ if(crop.mode=='pts'&&crop.pts.length){const P2=crop.pts.map(([a,b])=>[(a-.5)*g.bw,(b-.5)*g.bh]);x.strokeStyle='#e8590c';x.lineWidth=2*DPR;x.beginPath();P2.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.stroke();
+  P2.forEach(([a,b],i)=>{x.beginPath();x.arc(a,b,(i?5:9)*DPR,0,7);x.fillStyle=i?'#e8590c':'#fff';x.fill();x.stroke();});}
+ x.restore();}
+
 // ===================== context panel =====================
 const EDGES=[['none','ללא'],['cut','גזור'],['zigzag','זיגזג'],['torn','קרוע']];
 const chip=(act,val,txt,on,title)=>`<button data-a="${act}" data-v="${val}" class="${on?'on':''}" ${title?`title="${title}"`:''}>${txt}</button>`;
-function setTool(t){tool=tool==t?null:t;if(tool)sel=tool=='draw'?null:sel;['tImg','tCol','tTex','tDraw'].forEach(id=>$(id).classList.toggle('on',tool=={tImg:'img',tCol:'col',tTex:'tex',tDraw:'draw'}[id]));refreshAll();}
-function renderPanel(){const p=$('panel');const pg=P.pages[cur];let h='';
- if(tool=='draw'){h=`<h3>✏️ ציור חופשי</h3><div class="lbl">עובי</div><div class="chips">${[[.003,'דק'],[.008,'בינוני'],[.02,'עבה']].map(([w,t])=>chip('pw',w,t,!pen.er&&pen.w==w)).join('')}</div>
-  <div class="row">צבע <input type="color" id="pc" value="${pen.c}"> ${chip('per',1,'🧽 מחק',pen.er)}</div><div class="row"><button data-a="pclear">🗑 נקה ציור בעמוד</button></div><div class="row"><button data-a="tool" data-v="draw">✔ סיום ציור</button></div><p class="hint">מציירים ישירות על העמוד. האצבע/העכבר מציירים כל עוד מצב ציור פעיל.</p>`;}
- else if(sel){const L=sel.L,t=L.type;
+let tab='img';
+const TABS=[['img','🖼','תמונה'],['txt','🔤','טקסט'],['col','✂️','קולאז׳'],['draw','✏️','ציור']];
+function tabOf(L){return L.type=='image'?'img':L.type=='text'?'txt':L.type=='draw'?'draw':'col';}
+function setTab(t){tab=t;tool=t=='draw'?'draw':null;if(t=='draw'||(sel&&tabOf(sel.L)!=t))sel=null;refreshAll();}
+function setTool(t){if(t=='tex'){sel=null;refreshAll();const b=$('bgSec');if(b)b.scrollIntoView({block:'nearest'});return;}setTab(t);}
+function selOptions(){const L=sel.L,t=L.type;
   const order=`<div class="lbl">סדר (מה מלפנים)</div><div class="row"><button data-a="top" title="מעל הכול">⏫ לגמרי קדימה</button><button data-a="up">⬆ קדימה</button><button data-a="down">⬇ אחורה</button><button data-a="bottom" title="מתחת לכול">⏬ לגמרי אחורה</button></div>
    <div class="row">גודל <input type="range" id="lsize" min="0.02" max="${t=='text'?0.5:2.5}" step="0.005" value="${sizeGet(L)}" style="direction:ltr"></div>
-   <div class="row"><button data-a="rot90">↻ 90°</button><button data-a="dup">📑 שכפל</button><button data-a="copyL" title="להדבקה בעמוד אחר">📋 העתק</button><button data-a="del" class="del">🗑 מחק</button></div>`;
+   <div class="row"><button data-a="rot90">↻ 90°</button><button data-a="dup">📑 שכפל</button><button data-a="del" class="del">🗑 מחק</button></div>`;
   const edges=`<div class="lbl">קצוות</div><div class="chips">${EDGES.map(([v,n])=>chip('edge',v,n,(L.edge||'none')==v)).join('')}${chip('ereroll',1,'🎲',false,'הגרלת קצה חדש')}</div>`;
   const opac=`<div class="row">שקיפות <input type="range" id="lop" min="0.1" max="1" step="0.01" value="${L.op??1}"></div>`;
+  const cropUI=(()=>{if(!crop||crop.L!==L)return `<div class="row"><button data-a="crop" class="addb">✂️ חיתוך צורה</button>${L.mask?'<button data-a="uncrop">בטל חיתוך</button>':''}</div>`;
+   const m=L.mask||{};const sh=[['rect','▭ מלבן'],['ellipse','◯ עיגול'],['tri','△ משולש'],['diag','◣ אלכסון'],['halfV','◧ חצי אורך'],['halfH','⬒ חצי רוחב']];
+   return `<div class="cropbox"><b>✂️ חיתוך</b><div class="chips">${sh.map(([v,n])=>chip('mshape',v,n,crop.mode=='shape'&&m.k==(v.startsWith('half')?'rect':v)&&(v.startsWith('half')?m.half==v:!m.half))).join('')}${chip('mshape','pts','✍️ נקודות',crop.mode=='pts')}</div>
+   ${crop.mode=='pts'?`<p class="hint">הקישו נקודות סביב האזור שרוצים להשאיר. הקשה על הנקודה הראשונה (הלבנה) סוגרת את הצורה.</p><div class="row"><button data-a="pclose" ${crop.pts.length>=3?'':'disabled'}>✔ סגור צורה (${crop.pts.length})</button><button data-a="pundo" ${crop.pts.length?'':'disabled'}>↶ נקודה</button><button data-a="pclr" ${crop.pts.length?'':'disabled'}>נקה</button></div>`
+    :`<p class="hint">גררו את הצורה כדי להזיז אותה, ואת הריבועים בפינות כדי לשנות גודל.</p>${m.k=='tri'||m.k=='diag'?'<div class="row"><button data-a="mrot">↻ סובב צורה</button></div>':''}`}
+   <div class="row"><button data-a="cropdone" class="addb">✔ סיום חיתוך</button>${L.mask?'<button data-a="uncrop">בטל חיתוך</button>':''}</div><p class="hint">קצוות (גזור/זיגזג/קרוע) הולכים לפי קו החיתוך.</p></div>`;})();
   if(t=='image'){const f=L.filter||'none';const needInk=L.mult||['riso','stamp','halftone','misreg'].includes(f);
-   h=`<h3>🖼 תמונה${sel.own=='s'?' (כפולה)':''}</h3><div class="row"><button data-a="fill">מלא</button><button data-a="fit">התאם</button><button data-a="spread">${sel.own=='s'?'↩ בטל כפולה':'↔ פרוש על כפולה'}</button><button data-a="replace">🔄 החלפה</button></div>
+   return `<h3>התמונה שנבחרה${sel.own=='s'?' (כפולה)':''}</h3><div class="row"><button data-a="fill">מלא</button><button data-a="fit">התאם</button><button data-a="spread">${sel.own=='s'?'↩ בטל כפולה':'↔ פרוש על כפולה'}</button><button data-a="replace">🔄 החלפה</button></div>${cropUI}
    <div class="lbl">מראה הדפסה</div><div class="chips">${FILTERS.map(([v,n])=>chip('filter',v,n,f==v)).join('')}</div>
-   <div class="row"><label title="הלבן נעשה שקוף ורק הקווים/הצבע נשארים – מצוין לסקיצות סרוקות"><input type="checkbox" id="lmult" ${L.mult?'checked':''}> שקוף (מולטיפליי)</label>${needInk?`<label>דיו <input type="color" id="link" value="${L.ink||INKDEF[f]}"></label>`:''}</div>${f=='halftone'?`<div class="row">גודל נקודות <input type="range" id="lhs" min="60" max="320" step="5" value="${L.hs||HSDEF}" style="direction:ltr" title="שמאלה: נקודות גדולות · ימינה: עדינות"></div>`:''}${edges}${opac}${order}<div class="row"><button data-a="pasteimg">📋 הדבק תמונה</button></div>`;}
-  else if(t=='text'){h=`<h3>🔤 טקסט</h3><textarea id="ltext" rows="3">${(L.text||'').replace(/</g,'&lt;')}</textarea>
+   <div class="row"><label title="הלבן נעשה שקוף ורק הקווים/הצבע נשארים – מצוין לסקיצות סרוקות"><input type="checkbox" id="lmult" ${L.mult?'checked':''}> שקוף (מולטיפליי)</label>${needInk?`<label>דיו <input type="color" id="link" value="${L.ink||INKDEF[f]}"></label>`:''}</div>${f=='halftone'?`<div class="row">גודל נקודות <input type="range" id="lhs" min="60" max="320" step="5" value="${L.hs||HSDEF}" style="direction:ltr" title="שמאלה: נקודות גדולות · ימינה: עדינות"></div>`:''}${edges}${opac}${order}`;}
+  if(t=='text')return `<h3>הטקסט שנבחר</h3><textarea id="ltext" rows="3">${(L.text||'').replace(/</g,'&lt;')}</textarea>
    <div class="chips">${[['right','ימין'],['center','מרכז'],['left','שמאל']].map(([v,n])=>chip('align',v,n,(L.align||'center')==v)).join('')}</div>
    <div class="row"><button data-a="font" title="גופן הבא">🎲 גופן</button> צבע <input type="color" id="lcol" value="${L.color||'#111111'}"></div>
-   <div class="row"><label><input type="checkbox" id="lbgOn" ${L.bgOn?'checked':''}> רקע לטקסט</label><input type="color" id="lbg" value="${L.bg||'#ffffff'}"></div>${opac}${order}<p class="hint">גוררים להזזה, פינה לשינוי גודל, ↻ לסיבוב.</p>`;}
-  else{h=`<h3>✂️ ${ELNAMES[t]||'קולאז׳'}</h3><div class="row">צבע <input type="color" id="lcol" value="${L.color||'#e3d3a8'}"> <button data-a="vary">🎲 וריאציה</button></div>
-   ${t=='washi'?`<div class="chips">${[['stripes','פסים'],['dots','נקודות'],['grid','משבצות'],['plain','חלק']].map(([v,n])=>chip('pat',v,n,L.pat==v)).join('')}</div>`:''}${edges}${opac}${order}`;}}
- else if(tool=='col'){h=`<h3>✂️ קולאז׳</h3><p class="hint">כל לחיצה מוסיפה פריט אחד לעמוד.</p><div class="chips">${[['sticky','פתק'],['strip','רצועת נייר'],['washi','וואשי'],['masking','נייר דבק']].map(([v,n])=>chip('add',v,n,false)).join('')}${chip('add','rand','🎲 אקראי',false)}</div>`;}
- else if(tool=='tex'){const tx=pg.tex;h=`<h3>🧻 טקסטורה לעמוד</h3><p class="hint">טקסטורה אחת לעמוד. כברירת מחדל היא מעל הכול – אפשר להזיז אחורה/קדימה.</p><div class="row"><button data-a="texr" style="flex:1;font-size:15px">🎲 טקסטורה</button></div>
-  <div class="chips">${TEXK.map(([v,n])=>chip('texk',v,n,tx&&tx.kind==v)).join('')}${chip('texk','none','ללא',!tx)}</div>${tx?`<div class="row">עוצמה <input type="range" id="texa" min="0.05" max="1" step="0.01" value="${tx.amt}"></div><div class="row"><button data-a="texup">⬆ קדימה</button><button data-a="texdown">⬇ אחורה</button></div><p class="hint" id="texpos">מיקום: ${texPosName(pg)}</p>`:''}`;}
- else if(tool=='img'){h=`<h3>🖼 תמונה</h3><div class="row"><button data-a="pickimg" style="flex:1;font-size:15px">🖼 בחירת תמונה</button></div><div class="row"><button data-a="pasteimg" style="flex:1;font-size:15px">📋 הדבק תמונה</button></div><p class="hint">אפשר לבחור כמה תמונות יחד, לגרור קבצים לעמוד, או להעתיק תמונה ולהדביק.</p>`;}
- else{h=`<p class="hint">הקישו על פריט כדי לערוך: גרירה להזזה, ריבוע בפינה לגודל, ↻ לסיבוב, ✕ למחיקה. בטלפון: הקשה בוחרת, ואז גוררים או משתמשים בשתי אצבעות.</p>
-  `;h=`<h3>${label(cur)} – צבע הדף</h3><div class="chips sw">${PAPERS.map(([c,n])=>`<button data-a="bgsw" data-v="${c}" title="${n}" class="${(pg.bg||'#ffffff').toLowerCase()==c?'on':''}" style="background:${c}!important;color:${c=='#1b1b1b'?'#fff':'#222'}!important">${n}</button>`).join('')}</div>
+   <div class="row"><label><input type="checkbox" id="lbgOn" ${L.bgOn?'checked':''}> רקע לטקסט</label><input type="color" id="lbg" value="${L.bg||'#ffffff'}"></div>${opac}${order}`;
+  return `<h3>${ELNAMES[t]||'קולאז׳'} שנבחר</h3><div class="row">צבע <input type="color" id="lcol" value="${L.color||'#e3d3a8'}"> <button data-a="vary">🎲 וריאציה</button></div>
+   ${cropUI}${t=='washi'?`<div class="chips">${[['stripes','פסים'],['dots','נקודות'],['grid','משבצות'],['plain','חלק']].map(([v,n])=>chip('pat',v,n,L.pat==v)).join('')}</div>`:''}${edges}${opac}${order}`;}
+function renderPanel(){const p=$('panel');const pg=P.pages[cur];
+ if(sel){tab=tabOf(sel.L);if(tool=='draw')tool=null;}
+ let h=`<div id="elSec"><div class="ptabs">${TABS.map(([v,ic,n])=>`<button data-a="tab" data-v="${v}" class="${tab==v?'on':''}"><span class="ic">${ic}</span>${n}</button>`).join('')}</div><div class="tbody">`;
+ if(tab=='img')h+=`<div class="row"><button data-a="pickimg" class="addb">➕ הוספת תמונות</button><button data-a="pasteimg" class="addb">📋 הדבק תמונה</button></div>${sel?'':'<p class="hint">אפשר לבחור כמה תמונות יחד – כל אחת שכבה נפרדת. אפשר גם לגרור קבצים לעמוד.</p>'}`;
+ if(tab=='txt')h+=`<div class="row"><button data-a="addtxt" class="addb">➕ טקסט חדש</button></div>`;
+ if(tab=='col')h+=`<div class="lbl">הוספה (כל לחיצה = פריט אחד)</div><div class="chips">${[['sticky','פתק'],['strip','רצועת נייר'],['washi','וואשי'],['masking','נייר דבק']].map(([v,n])=>chip('add',v,n,false)).join('')}${chip('add','rand','🎲 אקראי',false)}</div>`;
+ if(tab=='draw')h+=`<p class="hint">מצב ציור פעיל – מציירים ישירות על העמוד. לסיום עברו ללשונית אחרת.</p><div class="lbl">עובי</div><div class="chips">${[[.003,'דק'],[.008,'בינוני'],[.02,'עבה']].map(([w,t])=>chip('pw',w,t,!pen.er&&pen.w==w)).join('')}</div>
+  <div class="row">צבע <input type="color" id="pc" value="${pen.c}"> ${chip('per',1,'🧽 מחק',pen.er)}</div><div class="row"><button data-a="pclear">🗑 נקה ציור בעמוד</button></div>`;
+ if(sel)h+=`<div class="selbox">${selOptions()}</div>`;
+ else if(tab!='draw')h+=`<p class="hint">הקישו על פריט בעמוד כדי לערוך אותו: גרירה להזזה, ריבוע בפינה לגודל, ↻ לסיבוב, ✕ למחיקה. בטלפון: הקשה בוחרת, ואז גוררים או משתמשים בשתי אצבעות.</p>`;
+ h+=`<div class="clip"><span class="lbl">לוח:</span><button data-a="copyL" ${sel?'':'disabled'} title="Ctrl+C">📋 העתק</button><button data-a="cutL" ${sel?'':'disabled'} title="Ctrl+X">✂️ גזור</button><button data-a="pasteL" ${layerClip?'':'disabled'} title="Ctrl+V – גם בעמוד אחר">📌 הדבק</button></div>`;
+ h+=layerStrip()+`<div class="row"><button data-a="clearpage" class="small">🧹 ניקוי העמוד</button></div></div></div>`;
+ const tx=pg.tex;
+ h+=`<div id="bgSec"><h3>🎨 רקע הדף – ${label(cur)}</h3><div class="lbl">צבע הנייר</div><div class="chips sw">${PAPERS.map(([c,n])=>`<button data-a="bgsw" data-v="${c}" title="${n}" class="${(pg.bg||'#ffffff').toLowerCase()==c?'on':''}" style="background:${c}!important;color:${c=='#1b1b1b'?'#fff':'#222'}!important">${n}</button>`).join('')}</div>
   <div class="row">צבע אחר <input type="color" id="pbg" value="${pg.bg||'#ffffff'}"><button data-a="bgall">החל על כל העמודים</button></div>
-  <div class="row">${layerClip?'<button data-a="pasteL">📋 הדבק פריט</button>':''}<button data-a="clearpage">🧹 ניקוי העמוד</button></div>`+h;}
- p.innerHTML=h+layerStrip();wirePanel();}
+  <div class="lbl">טקסטורה (שכבה שקופה מעל הכול)</div><div class="row"><button data-a="texr" class="addb">🎲 טקסטורה</button></div>
+  <div class="chips">${TEXK.map(([v,n])=>chip('texk',v,n,tx&&tx.kind==v)).join('')}${chip('texk','none','ללא',!tx)}</div>${tx?`<div class="row">עוצמה <input type="range" id="texa" min="0.05" max="1" step="0.01" value="${tx.amt}"></div><div class="row"><button data-a="texup">⬆ קדימה</button><button data-a="texdown">⬇ אחורה</button><span class="hint" id="texpos">${texPosName(pg)}</span></div>`:''}</div>`;
+ p.innerHTML=h;wirePanel();}
 function wirePanel(){const p=$('panel');p.querySelectorAll('[data-a]').forEach(b=>b.onclick=e=>{e.stopPropagation();panelAct(b.dataset.a,b.dataset.v);});
  const on=(id,ev,fn)=>{const el=$(id);if(el)el.addEventListener(ev,fn);};
  on('pc','input',e=>pen.c=e.target.value);on('pbg','input',e=>{P.pages[cur].bg=e.target.value;refreshEditorAndSoon();});
@@ -847,10 +921,16 @@ function wirePanel(){const p=$('panel');p.querySelectorAll('[data-a]').forEach(b
 let rq;function refreshEditorAndSoon(){refreshEditor();clearTimeout(rq);rq=setTimeout(()=>{refreshGrid();autosave();},300);}
 function panelAct(a,v){const pg=P.pages[cur];const L=sel&&sel.L;
  switch(a){
- case 'pw':pen.w=+v;pen.er=false;break;case 'per':pen.er=!pen.er;break;case 'pclear':pg.layers=pg.layers.filter(l=>l.type!='draw');break;case 'tool':setTool(v);return;
+ case 'pw':pen.w=+v;pen.er=false;break;case 'per':pen.er=!pen.er;break;case 'pclear':pg.layers=pg.layers.filter(l=>l.type!='draw');break;case 'crop':crop={L,own:sel.own,mode:'shape',pts:[]};if(!L.mask)L.mask={k:'rect',x:.5,y:.5,w:.8,h:.8};break;
+ case 'cropdone':crop=null;break;case 'uncrop':delete L.mask;crop=null;break;
+ case 'mshape':{if(v=='pts'){crop.mode='pts';crop.pts=[];break;}crop.mode='shape';const M={rect:{k:'rect',x:.5,y:.5,w:.8,h:.8},ellipse:{k:'ellipse',x:.5,y:.5,w:.8,h:.8},tri:{k:'tri',x:.5,y:.5,w:1,h:1,q:0},diag:{k:'diag',x:.5,y:.5,w:1,h:1,q:0},halfV:{k:'rect',half:'halfV',x:.75,y:.5,w:.5,h:1},halfH:{k:'rect',half:'halfH',x:.5,y:.25,w:1,h:.5}};L.mask=M[v];break;}
+ case 'mrot':L.mask.q=((L.mask.q||0)+1)%4;break;
+ case 'pclose':closePts();return;case 'pundo':crop.pts.pop();break;case 'pclr':crop.pts=[];break;
+ case 'tab':setTab(v);return;case 'addtxt':addText();return;
+ case 'cutL':{const c=clone(L);if(sel.own=='s')fromSp(c,spHalf(cur));layerClip=c;lastClip='layer';delSel();toast('הפריט נגזר – אפשר להדביק בכל עמוד (📌 הדבק או Ctrl+V)');return;}
  case 'up':case 'down':case 'top':case 'bottom':moveEntry({k:sel.own,L},a);break;
  case 'lmv':{const [ix,how]=v.split(':');const e=stackOf(cur)[+ix];if(e)moveEntry(e,how);break;}
- case 'lsel':{const e=stackOf(cur)[+v];if(!e)break;if(e.k=='tex'){sel=null;tool='tex';}else if(e.L.type=='draw'){sel=null;tool='draw';}else{sel={own:e.k,L:e.L};tool=null;}syncToolBtns();break;}
+ case 'lsel':{const e=stackOf(cur)[+v];if(!e)break;if(e.k=='tex'){sel=null;if(tool=='draw'){tool=null;tab='img';}refreshAll();const b=$('bgSec');if(b)b.scrollIntoView({block:'nearest',behavior:'smooth'});return;}else if(e.L.type=='draw'){setTab('draw');return;}else{sel={own:e.k,L:e.L};tool=null;}break;}
  case 'bgsw':pg.bg=v;break;case 'bgall':{const c=pg.bg||'#ffffff';P.pages.forEach(q=>q.bg=c);status('צבע הדף הוחל על כל העמודים');break;}
  case 'copyL':{const c=clone(L);if(sel.own=='s')fromSp(c,spHalf(cur));layerClip=c;lastClip='layer';toast('הפריט הועתק – עברו לעמוד אחר ולחצו "הדבק פריט"');break;}
  case 'pasteL':pasteLayer();return;
@@ -884,7 +964,7 @@ async function addImageSrc(src,opts={}){await loadImg(src);const p=P.pages[opts.
  if(opts.grid){const g=opts.grid,cw=.86/g.cols,chh=.86/g.rows,[pw,ph]=pageMM(),ap=ph/pw;const col=g.k%g.cols,row=Math.floor(g.k/g.cols);L.w=Math.min(cw*.92,chh*.92/(L.ar*ap));L.x=.93-cw*(col+.5);L.y=.07+chh*(row+.5);}
  else if(!hasImg||opts.fill)fillL(L,'p','fill');else{L.x=.5+((n%4)-1.5)*.05;L.y=.5+((n%4)-1.5)*.05;}
  if(opts.fill)p.layers.unshift(L);else{const di=p.layers.findIndex(l=>l.type=='draw');di>=0?p.layers.splice(di,0,L):p.layers.push(L);}
- if((opts.page??cur)==cur){sel={own:'p',L};if(tool=='draw'||tool=='img'){tool=null;syncToolBtns();}}refreshAll();return L;}
+ if((opts.page??cur)==cur){sel={own:'p',L};if(tool=='draw')tool=null;}refreshAll();return L;}
 async function addImageFiles(files){const fs=files.filter(f=>!f.type||f.type.startsWith('image/')||/\.(jpe?g|png|gif|webp|bmp|heic|heif|avif)$/i.test(f.name||''));if(!fs.length){toast('לא נמצאו קבצי תמונה');return;}
  const many=fs.length>1,cols=Math.ceil(Math.sqrt(fs.length)),rows=Math.ceil(fs.length/cols);let ok=0;const bad=[];
  for(let k=0;k<fs.length;k++){const src=await prepImage(fs[k]);if(!src){bad.push(fs[k].name||'?');continue;}
@@ -904,8 +984,8 @@ function newEl(type,r){const pick=a=>a[Math.floor(r()*a.length)];const seed=1+Ma
  if(type=='washi'){e.w=S*2;e.h=S*.4;e.color=pick(PAL.washi);e.pat=pick(['stripes','dots','grid','plain']);e.ends=r()<.5?'zig':'torn';}
  if(type=='masking'){e.w=S*1.7;e.h=S*.35;}return e;}
 function addCollage(t){const r=rng((Date.now()^Math.random()*1e9)>>>0);if(t=='rand')t=['washi','washi','masking','strip','sticky'][Math.floor(r()*5)];const e=newEl(t,r);P.pages[cur].layers.push(e);sel={own:'p',L:e};refreshAll();}
-$('tImg').onclick=()=>{sel=null;setTool('img');};$('fImg').onchange=e=>{addImageFiles([...e.target.files]);e.target.value='';};
-$('tTxt').onclick=addText;$('tCol').onclick=()=>{sel=null;setTool('col');};$('tTex').onclick=()=>{sel=null;setTool('tex');};$('tDraw').onclick=()=>setTool('draw');
+$('fImg').onchange=e=>{addImageFiles([...e.target.files]);e.target.value='';};
+
 $('bulk').onclick=()=>$('fBulk').click();$('fBulk').onchange=async e=>{const fs=[...e.target.files].filter(f=>f.type.startsWith('image/')).sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));for(let k=0;k<fs.length&&k<N();k++)await addImageSrc(await readFile(fs[k]),{page:k,fill:true});e.target.value='';sel=null;refreshAll();};
 // ===================== pages: duplicate / copy / paste =====================
 let pageClip=null,layerClip=null,lastClip='page';
@@ -918,8 +998,9 @@ function flattenSpreads(){Object.keys(P.spreads||{}).forEach(k=>{k=+k;(P.spreads
 function isTyping(){const a=document.activeElement;return a&&(a.tagName=='TEXTAREA'||a.isContentEditable||(a.tagName=='INPUT'&&/text|number|search|url|email/.test(a.type)));}
 document.addEventListener('keydown',e=>{if(isTyping())return;
  if((e.key=='Delete'||e.key=='Backspace')&&sel){e.preventDefault();delSel();return;}
- if(e.key=='Escape'){sel=null;if(tool)setTool(tool);$('helpModal').classList.remove('on');refreshAll();return;}
+ if(e.key=='Escape'){if(crop){crop=null;refreshAll();return;}sel=null;if(tool=='draw'){tool=null;tab='img';}$('helpModal').classList.remove('on');refreshAll();return;}
  if(!(e.ctrlKey||e.metaKey))return;
+ if(e.code=='KeyX'&&sel){e.preventDefault();panelAct('cutL');return;}
  if(e.code=='KeyC'){if(sel){const c=clone(sel.L);if(sel.own=='s')fromSp(c,spHalf(cur));layerClip=c;lastClip='layer';status('הפריט הועתק');}else copyPage();e.preventDefault();}});
 document.addEventListener('paste',e=>{if(isTyping())return;const items=[...(e.clipboardData&&e.clipboardData.items||[])];const files=items.filter(i=>i.kind=='file'&&i.type.startsWith('image/')).map(i=>i.getAsFile()).filter(Boolean);
  e.preventDefault();if(files.length){addImageFiles(files);return;}
@@ -1004,7 +1085,7 @@ window.__zine={get P(){return P},setProject,makePrintPDF,makeReadingPDF,impose,a
 
 // ===================== page colors, layer strip, order, undo =====================
 const PAPERS=[['#ffffff','לבן'],['#f6efdc','שמנת'],['#d8c3a0','קרפט'],['#e6e6e6','אפור'],['#f7d6d9','ורוד'],['#d7eadf','מנטה'],['#d6e4f0','תכלת'],['#f6eaa6','צהוב'],['#1b1b1b','שחור']];
-function syncToolBtns(){['tImg','tCol','tTex','tDraw'].forEach(id=>$(id).classList.toggle('on',tool=={tImg:'img',tCol:'col',tTex:'tex',tDraw:'draw'}[id]));}
+function syncToolBtns(){}
 function pageStack(pg){const z=texZ(pg);const a=pg.layers.map(L=>({k:'p',L}));if(pg.tex&&pg.tex.kind&&z>=0)a.splice(z,0,{k:'tex'});return a;}
 // full stack for page i, bottom -> top
 function stackOf(i){const pg=P.pages[i];const out=[];if(pg.tex&&pg.tex.kind&&texZ(pg)==-1)out.push({k:'tex'});(spLayers(i)||[]).forEach(L=>out.push({k:'s',L}));return out.concat(pageStack(pg));}
@@ -1024,8 +1105,8 @@ function entryInfo(e){if(e.k=='tex'){const n=(TEXK.find(t=>t[0]==P.pages[cur].te
  const L=e.L,pre=e.k=='s'?'🔗 ':'';if(L.type=='image'){const t=thumbOf(L.src);return[t?`<img src="${t}">`:'<span class="ico">🖼</span>',pre+'תמונה'+(e.k=='s'?' כפולה':'')];}
  if(L.type=='text')return['<span class="ico">🔤</span>','"'+esc((L.text||'').replace(/\n/g,' ').slice(0,18))+'"'];if(L.type=='draw')return['<span class="ico">✏️</span>','ציור'];
  return['<span class="ico">✂️</span>',ELNAMES[L.type]||L.type];}
-function layerStrip(){const st=stackOf(cur);if(!st.length)return '';let h='<div id="lstrip"><div class="lbl">שכבות – למעלה = מלפנים</div>';
- for(let i=st.length-1;i>=0;i--){const e=st[i];const [ic,nm]=entryInfo(e);const on=(e.k=='tex'&&tool=='tex'&&!sel)||(e.L&&sel&&sel.L===e.L)||(e.L&&e.L.type=='draw'&&tool=='draw');
+function layerStrip(){const st=stackOf(cur);if(!st.length)return '';let h='<div id="lstrip"><div class="lbl">שכבות בעמוד – למעלה = מלפנים</div>';
+ for(let i=st.length-1;i>=0;i--){const e=st[i];const [ic,nm]=entryInfo(e);const on=(e.L&&sel&&sel.L===e.L)||(e.L&&e.L.type=='draw'&&tool=='draw');
   h+=`<div class="lrow${on?' on':''}" data-a="lsel" data-v="${i}">${ic}<span class="nm">${nm}</span><button data-a="lmv" data-v="${i}:up" title="קדימה">▲</button><button data-a="lmv" data-v="${i}:down" title="אחורה">▼</button></div>`;}
  if(spLayers(cur))h+='<p class="hint">🔗 תמונה כפולה נמצאת תמיד מתחת לפריטים של העמוד.</p>';return h+'</div>';}
 function pasteLayer(){if(!layerClip)return;const c=clone(layerClip);c.id=nid();if(P.pages[cur].layers.some(l=>l.x==c.x&&l.y==c.y&&l.type==c.type)){c.x=Math.min(.95,c.x+.03);c.y=Math.min(.95,c.y+.03);}
@@ -1033,7 +1114,7 @@ function pasteLayer(){if(!layerClip)return;const c=clone(layerClip);c.id=nid();i
 let _repl=null;const fRep=document.createElement('input');fRep.type='file';fRep.accept='image/*';fRep.hidden=true;document.body.appendChild(fRep);
 function replaceImage(){if(!sel||sel.L.type!='image')return;_repl=sel;fRep.click();}
 fRep.onchange=async()=>{const f=fRep.files[0];fRep.value='';if(!f||!_repl)return;const src=await prepImage(f);if(!src){toast('לא הצלחתי לפתוח את התמונה');return;}await loadImg(src);const L=_repl.L;L.src=src;const oh=L.w*(L.ar||.75);delete L.ar;ar(L);sel=_repl;refreshAll();};
-$('pageOpts').onclick=()=>{sel=null;tool=null;syncToolBtns();refreshAll();if(innerWidth<=800)$('panel').scrollIntoView({behavior:'smooth'});};
+$('pageOpts').onclick=()=>{sel=null;if(tool=='draw'){tool=null;tab='img';}refreshAll();$('bgSec').scrollIntoView({behavior:'smooth',block:'nearest'});};
 // ---- undo / redo: snapshots (image strings are shared, not copied) ----
 let hist=[],hi=-1,_restoring=false;
 function dcopy(v){if(Array.isArray(v))return v.map(dcopy);if(v&&typeof v=='object'){const o={};for(const k in v)o[k]=dcopy(v[k]);return o;}return v;}
