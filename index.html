@@ -49,6 +49,19 @@ main{flex:1;min-height:0;display:flex;gap:8px;padding:8px}
 .warn{color:#b3261e!important;font-weight:600}.stknew{margin-top:6px;padding:6px;border:1px dashed #c9b88a;border-radius:8px}#stkNew,#stext{flex:1;min-width:0;font-size:15px;padding:5px 7px;font-family:inherit}.chips.small button{font-size:11px;padding:2px 6px}
 textarea{width:100%;direction:rtl;font-size:15px}
 .del{background:#c33!important;color:#fff!important;border-color:#c33!important}
+.stForm .genH{display:flex;justify-content:space-between;align-items:center;font-size:17px}
+.stForm textarea{width:100%;box-sizing:border-box;font:inherit;padding:6px}.stForm .lbl{margin-top:8px;font-weight:bold}.stForm .chips button.on{background:#5a4632!important;color:#fff!important}
+#gThumbs{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0}.gT{position:relative}.gT img{width:54px;height:54px;object-fit:cover;border-radius:5px;border:1px solid #ccb}.gT button{position:absolute;top:-6px;left:-6px;padding:0 5px!important;font-size:11px;border-radius:50%!important}
+.gKeep{flex-direction:column;align-items:flex-start!important}#gKey{flex:1;min-width:0;padding:5px}.gBar{height:9px;background:#ddd;border-radius:5px;overflow:hidden;margin:8px 0 3px}#gBarIn{height:100%;width:0;background:linear-gradient(90deg,#e8590c,#7048e8);transition:width .3s}
+#gGo{flex:1;font-size:16px;padding:8px}
+#start{position:fixed;inset:0;z-index:40;overflow:auto;display:none;background:#2f4d3a;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:24px 24px;color:#222;font-size:15px}#start.on{display:block}html.stOn,html.stOn body{overflow:hidden}
+.stIn{max-width:560px;margin:0 auto;padding:18px 14px 40px}.stLogo{color:#fffaf0;text-align:center;font-size:26px;font-weight:bold;margin:6px 0 4px;text-shadow:0 1px 2px #0006}.stOr{color:#e9efe6;text-align:center;margin:10px 0 2px;font-size:15px}
+.stCard{display:flex!important;gap:14px;align-items:center;width:100%;text-align:right;padding:16px!important;margin:10px 0;border-radius:14px!important;background:#fbf7ee!important;color:#222!important;border:1px solid #b9a683!important;box-shadow:0 3px 8px #0004!important;font-size:19px!important;font-family:inherit;cursor:pointer}
+.stCard .ic{font-size:36px;flex:none;width:46px;text-align:center}.stCard small{display:block;font-size:13.5px;color:#5b5446;font-weight:normal;margin-top:2px}.stCard:active{transform:translateY(1px)}
+.stCont{background:#fff3c4!important;border-color:#c9a227!important}.stCont img{width:54px;border-radius:4px;box-shadow:0 1px 3px #0005;flex:none}
+.stLink{display:block;margin:12px auto;background:none!important;border:0!important;box-shadow:none!important;color:#fff3c4!important;text-decoration:underline;font-size:15px}.stNote{color:#d6e2d3!important;text-align:center}
+.stForm{background:#fffaf0;border-radius:14px;padding:14px 16px;box-shadow:0 4px 14px #0005;margin-top:10px}.stForm .genH{display:flex;justify-content:space-between;align-items:center;font-size:18px}.stForm .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:5px 0}.stN label{font-size:16px;margin-left:14px}
+.stForm .addb{flex:1;padding:10px!important;font-size:15px!important}
 .modalBg{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:20}.modalBg.on{display:flex}
 .dlBox{background:#fffaf0;color:#222;padding:14px 18px;border-radius:8px;width:min(92vw,420px);box-shadow:0 6px 20px #0006}
 .dlA{display:inline-block;padding:9px 16px;border-radius:6px;text-decoration:none;font-weight:bold;margin:6px 0;font-size:15px;cursor:pointer}
@@ -98,6 +111,7 @@ button.small{font-size:12px;padding:2px 7px}.cropbox{border:2px dashed #e8590c;b
 <header><h1>✂️ יוצר פאנזינים</h1>
 <button class="tb ur" id="undoB" title="ביטול (Ctrl+Z)"><span class="ic">↶</span><span class="lb">ביטול</span></button><button class="tb ur" id="redoB" title="חזרה (Ctrl+Shift+Z / Ctrl+Y)"><span class="ic">↷</span><span class="lb">חזרה</span></button>
 <button class="tb pri" id="pdf" title="PDF להדפסה"><span class="ic">🖨</span><span class="lb">הדפסה</span></button>
+<button class="tb" id="newZ" title="פאנזין חדש – חזרה למסך הפתיחה"><span class="ic">🆕</span><span class="lb">חדש</span></button>
 <button class="tb" id="helpBtn" title="הוראות קיפול"><span class="ic">❓</span><span class="lb">קיפול</span></button>
 <details class="menu"><summary title="הגדרות">⚙️</summary><div class="pop">
 <label>מספר עמודים: <select id="mode" title="מספר עמודים"><option value="8">8 עמ׳</option><option value="16">16 עמ׳</option></select></label>
@@ -108,6 +122,7 @@ button.small{font-size:12px;padding:2px 7px}.cropbox{border:2px dashed #e8590c;b
 <label><input type="checkbox" id="craftT" checked> עיצוב שולחן עבודה</label>
 <button id="pdfr">👁 PDF לתצוגה (לא להדפסה)</button>
 <button id="bulk">מילוי עמודים מתמונות…</button>
+<button id="newZ2">🏠 מסך הפתיחה (פאנזין חדש)</button>
 <button id="save">שמירה</button><button id="exp">ייצוא פרויקט</button><button id="imp">ייבוא פרויקט</button>
 </div></details>
 <span id="status"></span>
@@ -935,7 +950,7 @@ function panelAct(a,v){const pg=P.pages[cur];const L=sel&&sel.L;
  case 'mshape':{if(v=='pts'){crop.mode='pts';crop.pts=[];break;}crop.mode='shape';const M={rect:{k:'rect',x:.5,y:.5,w:.8,h:.8},ellipse:{k:'ellipse',x:.5,y:.5,w:.8,h:.8},tri:{k:'tri',x:.5,y:.5,w:1,h:1,q:0},diag:{k:'diag',x:.5,y:.5,w:1,h:1,q:0},halfV:{k:'rect',half:'halfV',x:.75,y:.5,w:.5,h:1},halfH:{k:'rect',half:'halfH',x:.5,y:.25,w:1,h:.5}};L.mask=M[v];break;}
  case 'mrot':L.mask.q=((L.mask.q||0)+1)%4;break;
  case 'pclose':closePts();return;case 'pundo':crop.pts.pop();break;case 'pclr':crop.pts=[];break;
- case 'tab':setTab(v);return;case 'addtxt':addText();return;case 'stkadd':addSticker(($('stkNew')||{}).value);return;
+case 'tab':setTab(v);return;case 'addtxt':addText();return;case 'stkadd':addSticker(($('stkNew')||{}).value);return;
  case 'stkr':stkSet(L,{style:stkRandStyle(L.style),sseed:1+Math.floor(Math.random()*1e9)});break;case 'stkc':stkSet(L,{sseed:1+Math.floor(Math.random()*1e9)});break;case 'stks':stkSet(L,{style:v,sseed:1+Math.floor(Math.random()*1e9)});break;
  case 'cutL':{const c=clone(L);if(sel.own=='s')fromSp(c,spHalf(cur));layerClip=c;lastClip='layer';delSel();toast('הפריט נגזר – אפשר להדביק בכל עמוד (📌 הדבק או Ctrl+V)');return;}
  case 'up':case 'down':case 'top':case 'bottom':moveEntry({k:sel.own,L},a);break;
@@ -1040,6 +1055,8 @@ function ensureIds(p){(p.pages||[]).forEach(pg=>{pg.layers=pg.layers||[];pg.laye
 // ===================== storage =====================
 function db(){return new Promise((r,j)=>{const q=indexedDB.open('zineMaker',1);q.onupgradeneeded=()=>q.result.createObjectStore('p');q.onsuccess=()=>r(q.result);q.onerror=j;});}
 async function dbPut(v){const d=await db();return new Promise(r=>{const t=d.transaction('p','readwrite');t.objectStore('p').put(v,'current');t.oncomplete=r;});}
+async function dbPutK(k,v){const d=await db();return new Promise(r=>{const t=d.transaction('p','readwrite');t.objectStore('p').put(v,k);t.oncomplete=r;});}
+async function dbGetK(k){const d=await db();return new Promise(r=>{const q=d.transaction('p').objectStore('p').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r(null);});}
 async function dbGet(){const d=await db();return new Promise(r=>{const q=d.transaction('p').objectStore('p').get('current');q.onsuccess=()=>r(q.result);q.onerror=()=>r(null);});}
 let stt;function autosave(){histPush();clearTimeout(stt);stt=setTimeout(()=>dbPut(JSON.stringify(P)).then(()=>status('נשמר')).catch(()=>{}),800);}
 function status(s){$('status').textContent=s;}
@@ -1089,9 +1106,9 @@ $('dlOpen').onclick=()=>{if(_dlURL)window.open(_dlURL,'_blank');};
 $('dlShare').onclick=async()=>{try{await navigator.share({files:[new File([_dlBlob],_dlName,{type:'application/pdf'})],title:_dlName});}catch(e){}};
 $('dlClose').onclick=()=>$('dlModal').classList.remove('on');
 // ===================== init =====================
-window.__zine={get P(){return P},setProject,makePrintPDF,makeReadingPDF,impose,addImageSrc,renderPage,migrate,get cur(){return cur},set cur(v){cur=v;sel=null;refreshAll();},
+window.__zine={get P(){return P},setProject(p){startHide();setProject(p);},makePrintPDF,makeReadingPDF,impose,addImageSrc,renderPage,migrate,get cur(){return cur},set cur(v){cur=v;sel=null;refreshAll();},
  get sel(){return sel},select(own,i){const a=own=='s'?spLayers(cur):P.pages[cur].layers;sel={own,L:a[i]};refreshAll();},geom:()=>sel&&geom(sel),handles:()=>sel&&handles(geom(sel)),get EW(){return EW},refreshAll,toggleSpread,panelAct,FONTS,get stk(){return{STK,stkLay,drawLayer,addSticker,stkSet}}};
-(async()=>{const s=await dbGet().catch(()=>null);if(s){try{setProject(JSON.parse(s));return;}catch(e){}}P={v:2,mode:8,dir:'rtl',pages:[],spreads:{}};ensure();help();refreshAll();})();
+const booted=(async()=>{const s=await dbGet().catch(()=>null);if(s){try{setProject(JSON.parse(s));return;}catch(e){}}P={v:2,mode:8,dir:'rtl',pages:[],spreads:{}};ensure();help();refreshAll();})();
 
 // ===================== page colors, layer strip, order, undo =====================
 const PAPERS=[['#ffffff','לבן'],['#f6efdc','שמנת'],['#d8c3a0','קרפט'],['#e6e6e6','אפור'],['#f7d6d9','ורוד'],['#d7eadf','מנטה'],['#d6e4f0','תכלת'],['#f6eaa6','צהוב'],['#1b1b1b','שחור']];
@@ -1264,6 +1281,235 @@ function addSticker(text){text=(text||'').trim()||'פאנזין!';const L={type:
 function stkFontsLoad(){return Promise.all(STKFONTS.map(f=>document.fonts.load('400 40px "'+f+'"','אבג abc').catch(()=>{})));}
 stkFontsLoad().then(()=>{stkCache.clear();refreshSoon();});
 if(document.fonts&&document.fonts.addEventListener)document.fonts.addEventListener('loadingdone',()=>{stkCache.clear();refreshSoon();});
+
+// ===================== ✨ AI zine generator (Gemini) =====================
+// The model only plans content; layout below is deterministic and every value is validated/clamped.
+const GEM_MODELS=['gemini-3.8-flash','gemini-flash-latest'];
+const GEM_URL=m=>'https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent';
+const GKEY='zmGeminiKey';
+const TONES=[['','חופשי'],['punk','פאנק'],['psych','פסיכדלי 70s'],['archive','מכונת כתיבה / ארכיון'],['minimal','מינימליסטי']];
+const TONEDEF={'':{tf:'Secular One',cf:'Frank Ruhl Libre',filt:'none',stk:['label','tag','bubble'],edge:'none'},
+ punk:{tf:'Rubik Dirt',cf:'Miriam Libre',filt:'photocopy',stk:['ransom','stamp','tape'],edge:'torn'},
+ psych:{tf:'Rubik Bubbles',cf:'Secular One',filt:'riso',stk:['psych','groovy','label'],edge:'none'},
+ archive:{tf:'Frank Ruhl Libre',cf:'Miriam Libre',filt:'halftone',stk:['type','stamp','dymo'],edge:'cut'},
+ minimal:{tf:'Secular One',cf:'Rubik',filt:'none',stk:['label','dymo'],edge:'none'}};
+const LIM={title:28,caption:90,sticker:24,stickers:2,images:3};
+const FOCUS=['center','top','bottom','left','right'];
+let gen={imgs:[],busy:false,abort:null};
+function gSchema(){const S=(e)=>({type:'string',enum:e});return{type:'object',properties:{
+ title:{type:'string',description:'zine title, Hebrew, max 28 chars'},
+ pages:{type:'array',items:{type:'object',properties:{page:{type:'integer'},title:{type:'string',description:'Hebrew, max 28 chars, may be empty'},caption:{type:'string',description:'Hebrew, max 90 chars, may be empty'},
+  images:{type:'array',items:{type:'object',properties:{index:{type:'integer'},focus:S(FOCUS),filter:S(FILTERS.map(f=>f[0]))},required:['index']}},
+  stickers:{type:'array',items:{type:'object',properties:{text:{type:'string',description:'Hebrew, max 24 chars'},style:S(STK.map(s=>s[0]))},required:['text','style']}},
+  edge:S(EDGES.map(e=>e[0])),bg:{type:'string',description:'paper colour as #rrggbb'},texture:S(['none',...TEXK.map(t=>t[0])])},required:['page']}},
+ spreads:{type:'array',items:{type:'object',properties:{first:{type:'integer'},image:{type:'integer'},filter:S(FILTERS.map(f=>f[0]))},required:['first','image']}}},required:['pages']};}
+function gPrompt(o){const n=o.n,pairs=[];for(let k=1;k<n-2;k+=2)pairs.push(k);
+ return `You are the art director of a small handmade Hebrew zine (פאנזין) of ${n} pages. Plan its CONTENT only; the app does the layout.
+Pages are numbered 0..${n-1}: page 0 = front cover, page ${n-1} = back cover, pages 1..${n-2} inside. Reading order is right-to-left (Hebrew).
+The user's idea (Hebrew): """${o.idea}"""
+${o.tone?'Mood/style: '+({punk:'punk DIY, xerox, ransom-note letters, rough',psych:'late-60s/70s psychedelic and groovy, warm orange/pink/yellow/teal, playful',archive:'archival, typewriter, old documents, halftone, stamps',minimal:'minimal, calm, lots of white space, few words'})[o.tone]+'.':''}
+There are ${o.k} images, given above as "Image 0".."Image ${Math.max(0,o.k-1)}". Look at them and distribute them meaningfully (cover gets the strongest image). Every image should be used at least once if possible; an image may repeat.
+Rules: write all text in natural Hebrew. Always write the full word "פאנזין" for zine (never a shortened form). title <= ${LIM.title} chars, caption <= ${LIM.caption} chars, sticker text <= ${LIM.sticker} chars, at most ${LIM.stickers} stickers and ${LIM.images} images per page. Not every page needs text; keep it short and punchy.
+"focus" = which part of the image matters if it must be cropped. Sticker styles: ${STK.map(s=>s[0]+' ('+s[1]+')').join(', ')}. Filters: ${FILTERS.map(f=>f[0]).join(', ')}. Edges: ${EDGES.map(e=>e[0]).join(', ')}. Textures: none, ${TEXK.map(t=>t[0]).join(', ')}.
+bg = paper colour (#rrggbb, light papers suit most pages). Optional "spreads": one image across two facing inside pages; "first" must be one of [${pairs.join(', ')}] (pages first & first+1).
+${o.guide?'Extra guidelines from the user (Hebrew): """'+o.guide+'"""\n':''}Return one entry in "pages" for every page 0..${n-1}.`;}
+// ---------- shared image list + run (the form lives on the start screen, app8) ----------
+function genThumbs(){const t=$('gThumbs');if(!t)return;t.innerHTML=gen.imgs.map((g,i)=>`<span class="gT"><img src="${g.small}"><button data-i="${i}" title="הסרה">✕</button></span>`).join('');
+ t.querySelectorAll('button').forEach(b=>b.onclick=()=>{gen.imgs.splice(+b.dataset.i,1);genThumbs();});const c=$('gCnt');if(c)c.textContent=gen.imgs.length?gen.imgs.length+' תמונות':'אפשר לבחור כמה יחד';}
+function small(src,mx=768){return new Promise(r=>{const im=new Image();im.onload=()=>{const k=Math.min(1,mx/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.naturalWidth*k));c.height=Math.max(1,Math.round(im.naturalHeight*k));const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.82));};im.onerror=()=>r(null);im.src=src;});}
+async function genAddFiles(files){const bad=[];for(const f of files){const src=await prepImage(f);if(!src){bad.push(f.name||'?');continue;}const sm=await small(src);if(sm)gen.imgs.push({src,small:sm});}genThumbs();if(bad.length)toast('לא הצלחתי לפתוח: '+bad.join(', '));}
+(function(){const i=document.createElement('input');i.type='file';i.id='gFile';i.accept='image/*';i.multiple=true;i.hidden=true;document.body.appendChild(i);i.onchange=e=>{genAddFiles([...e.target.files]);e.target.value='';};})();
+function gUI(st,pct,msg){const p=$('gProg');if(!p)return;p.hidden=!st;$('gBarIn').style.width=Math.round(pct)+'%';$('gStep').textContent=msg||'';$('gGo').disabled=!!st;$('gStop').hidden=!st;}
+function gErr(m){const e=$('gErr');if(e){e.textContent=m||'';e.hidden=!m;}}
+function pageUsed(p){return (p.layers||[]).length||p.tex||((p.bg||'#ffffff').toLowerCase()!='#ffffff');}
+// ---------- Gemini call ----------
+class GenErr extends Error{}
+async function gCall(key,parts,signal){let last;
+ for(const model of GEM_MODELS){let res;
+  try{res=await fetch(GEM_URL(model),{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({contents:[{role:'user',parts}],generationConfig:{responseMimeType:'application/json',responseSchema:gSchema(),temperature:1}})});}
+  catch(e){if(e.name=='AbortError')throw new GenErr('בוטל.');throw new GenErr('אין חיבור ל־Gemini – בדקו את האינטרנט ונסו שוב.');}
+  let body=null;try{body=await res.json();}catch(e){}
+  const msg=body&&body.error?(body.error.message||'')+' '+(body.error.status||''):'';
+  if(res.ok){const c=body&&body.candidates&&body.candidates[0];
+   if(!c||!c.content){const why=(body&&body.promptFeedback&&body.promptFeedback.blockReason)||(c&&c.finishReason)||'';throw new GenErr(why?'Gemini סירב לבקשה ('+why+'). נסו תמונות או ניסוח אחרים.':'Gemini לא החזיר תשובה. נסו שוב.');}
+   const txt=(c.content.parts||[]).filter(p=>p.text&&!p.thought).map(p=>p.text).join('').trim().replace(/^```(json)?|```$/g,'');
+   try{return{plan:JSON.parse(txt),model};}catch(e){throw new GenErr('התשובה מ־Gemini לא הייתה תקינה. נסו שוב.');}}
+  if(res.status==404){last=new GenErr('המודל לא זמין ('+model+').');continue;}
+  if(res.status==400&&/API_KEY|api key/i.test(msg))throw new GenErr('המפתח לא תקין. בדקו שהעתקתם את כולו מ־aistudio.google.com/apikey.');
+  if(res.status==401||res.status==403)throw new GenErr('המפתח לא מורשה ל־Gemini API (403). צרו מפתח חדש ב־AI Studio.');
+  if(res.status==429)throw new GenErr('נגמרה המכסה או שיש יותר מדי בקשות (429). חכו דקה ונסו שוב, או בדקו את המכסה ב־AI Studio.');
+  if(res.status>=500)throw new GenErr('השרת של Gemini עמוס כרגע ('+res.status+'). נסו שוב בעוד רגע.');
+  throw new GenErr('שגיאה מ־Gemini ('+res.status+'): '+msg.slice(0,140));}
+ throw last||new GenErr('לא נמצא מודל זמין.');}
+async function genRun(){if(gen.busy)return;gErr('');const key=(($('gKey')||{}).value||localStorage.getItem(GKEY)||'').trim();
+ if(!key){gErr('צריך מפתח Gemini – פתחו את 🔑 למטה והדביקו מפתח.');const d=$('gKeyBox');if(d)d.open=true;return;}localStorage.setItem(GKEY,key);
+ const idea=(($('gIdea')||{}).value||'').trim();if(!idea&&!gen.imgs.length){gErr('כתבו רעיון קצר או הוסיפו תמונות.');return;}
+ const keep=false;const n=+(gen.n||P.mode);const guide=cleanTxt(($('gGuide')||{}).value,600);
+ gen.busy=true;gen.abort=new AbortController();let tick;
+ try{gUI(1,8,'מכין תמונות…');const parts=[];gen.imgs.forEach((g,i)=>{parts.push({text:'Image '+i+':'});parts.push({inlineData:{mimeType:'image/jpeg',data:g.small.split(',')[1]}});});
+  parts.push({text:gPrompt({n,idea:idea||'(no text – build the story from the images)',tone:gen.tone||'',k:gen.imgs.length,guide})});
+  let pc=15;gUI(1,pc,'Gemini חושב על הפאנזין…');tick=setInterval(()=>{pc=Math.min(88,pc+(90-pc)*.06);gUI(1,pc,'Gemini חושב על הפאנזין…');},400);
+  const {plan,model}=await gCall(key,parts,gen.abort.signal);clearInterval(tick);gUI(1,92,'מעצב עמודים…');
+  await genFonts();await genApply(plan,{n,keep,tone:gen.tone||'',imgs:gen.imgs.map(g=>g.src)});gen.lastModel=model;
+  gUI(0);startHide();toast('✨ הטיוטה מוכנה – הכול ניתן לעריכה. ↶ מחזיר את מה שהיה.');}
+ catch(e){clearInterval(tick);gUI(0);gErr(e instanceof GenErr?e.message:'משהו השתבש: '+(e.message||e));console.warn(e);}
+ finally{gen.busy=false;gen.abort=null;}}
+async function genFonts(){await document.fonts.ready;await Promise.all([...FONTS,'Rubik',...STKFONTS].map(f=>document.fonts.load((FW[f]||400)+' 40px "'+f+'"','אבג abc').catch(()=>{})));stkCache.clear();}
+// ---------- validation helpers ----------
+const oneOf=(v,a,d)=>a.includes(v)?v:d;
+function cleanTxt(s,max){s=String(s==null?'':s).replace(/[\u0000-\u001f]+/g,' ').replace(/\s+/g,' ').trim();s=s.replace(/(^|[^\u05D0-\u05EA])\u05D6\u05D9\u05DF(?![\u05D0-\u05EA])/g,'$1פאנזין');
+ if(s.length>max){const cut=s.slice(0,max+1);const sp=cut.lastIndexOf(' ');s=(sp>max*.6?cut.slice(0,sp):s.slice(0,max-1)).replace(/[\s,.;:–-]+$/,'')+'…';}return s;}
+function hexOk(c){return /^#[0-9a-f]{6}$/i.test(c||'')?c.toLowerCase():null;}
+function lum(c){const [r,g,b]=hex(c).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;}
+function inkFor(bg){return lum(bg)>.35?'#161616':'#fbf7ee';}
+// ---------- deterministic layout ----------
+const GM=.06;// safe margin (fraction)
+function apr(){const [pw,ph]=pageMM();return ph/pw;}
+// fit text into a box (fractions of page W / H). returns {text,size} with size = fraction of H
+function fitText(text,font,maxW,maxH,smin,smax,maxLines){const A=apr(),RW=1000,RH=RW*A;mctx.font=(FW[font]||400)+' 100px "'+font+'"';const wd=s=>mctx.measureText(s).width/100;// width per unit size (px@1px)
+ const words=text.split(' ');const wrap=L=>{if(L==1)return[text];const tot=wd(text),tgt=tot/L;const out=[];let line='';words.forEach(w=>{const t=line?line+' '+w:w;if(line&&wd(t)>tgt*1.15&&out.length<L-1){out.push(line);line=w;}else line=t;});out.push(line);return out;};
+ const sizeFor=ls=>{const mw=Math.max(...ls.map(wd));// box: width=(mw*fs+fs*.5)  height=(n*1.25+.2)*fs   fs=size*RH px
+  const sW=maxW*RW/((mw+.5)*RH),sH=maxH/(ls.length*1.25+.2);return Math.min(smax,sW,sH);};
+ let best=null;for(let L=1;L<=Math.min(maxLines,words.length);L++){const ls=wrap(L);const s=sizeFor(ls);if(!best||s>best.size*1.15)best={text:ls.join('\n'),size:s,lines:ls.length};}
+ if(best.size<smin){// too long even with max lines: drop words until it fits at smin
+  let ws=words.slice();while(ws.length>1){ws.pop();const t=ws.join(' ')+'…';const r=fitText(t,font,maxW,maxH,smin,smax,maxLines);if(r.size>=smin)return r;}best.size=smin;}
+ return best;}
+function txtLayer(t,font,color,box,opts={}){const r=fitText(t,font,box.w,box.h,opts.smin||.022,opts.smax||.08,opts.lines||2);
+ return{type:'text',id:nid(),text:r.text,x:box.x+box.w/2,y:box.y+box.h/2,size:+r.size.toFixed(4),color,font,rot:0,op:1,align:'center',bgOn:!!opts.bg,bg:opts.bg||undefined};}
+// bounding box of a layer (fractions) incl. rotation
+function lbox(L,W=1000){const H=W*apr();const [bw,bh]=boxPx(L,W,H);const a=(L.rot||0)*Math.PI/180,c=Math.abs(Math.cos(a)),s=Math.abs(Math.sin(a));const ew=(bw*c+bh*s)/W,eh=(bw*s+bh*c)/H;return{x0:L.x-ew/2,x1:L.x+ew/2,y0:L.y-eh/2,y1:L.y+eh/2,ew,eh};}
+function keepIn(L,m=GM*.6){for(let k=0;k<12;k++){const b=lbox(L);if(b.ew>1-2*m||b.eh>1-2*m){if(L.type=='text')L.size*=.92;else L.w*=.92;continue;}break;}
+ const b=lbox(L);L.x=clamp(L.x,m+b.ew/2,1-m-b.ew/2);L.y=clamp(L.y,m+b.eh/2,1-m-b.eh/2);return L;}
+function stkLayer(text,style,cx,cy,maxW,letterH,rot){const L={type:'sticker',id:nid(),text,style,sseed:1+Math.floor(Math.random()*1e9),x:cx,y:cy,rot,op:1,w:.3};const s=stkLay(L);
+ L.w=clamp(letterH*apr()*s.w/F,.08,maxW);return keepIn(L);}
+// image that covers region r (fractions) cropped by a rect mask; focus picks what stays
+function coverImg(src,ar0,r,focus,filter,edge,rot){const A=apr();const w=Math.max(r.w,r.h*A/ar0),eh=w*ar0/A;let x=r.x+r.w/2,y=r.y+r.h/2;
+ if(focus=='top')y=r.y+eh/2;else if(focus=='bottom')y=r.y+r.h-eh/2;if(focus=='right')x=r.x+r.w-w/2;else if(focus=='left')x=r.x+w/2;
+ const L={type:'image',id:nid(),src,x,y,w,ar:ar0,rot:0,op:1,filter,edge,eseed:1+Math.floor(Math.random()*1e9)};
+ const mk={k:'rect',x:(r.x+r.w/2-(x-w/2))/w,y:(r.y+r.h/2-(y-eh/2))/eh,w:r.w/w,h:r.h/eh};if(mk.w<.999||mk.h<.999)L.mask=mk;
+ if(rot){L.rot=rot;}return L;}
+async function genApply(plan,o){const n=o.n,T=TONEDEF[o.tone]||TONEDEF[''];const imgs=o.imgs;const ars=[];for(const s of imgs){const im=await loadImg(s);ars.push(im.naturalWidth?im.naturalHeight/im.naturalWidth:.75);}
+ await keepPrev();histPush();// previous state = one undo step (and a saved copy)
+ if(!o.keep){const keepS={};Object.keys(P).forEach(k=>{if(k!='pages'&&k!='spreads')keepS[k]=P[k];});P=Object.assign(keepS,{mode:n,pages:[],spreads:{}});ensure();$('mode').value=n;help();}
+ const free=P.pages.map(p=>!pageUsed(p));const pagesIn=Array.isArray(plan&&plan.pages)?plan.pages:[];const byPage={};pagesIn.forEach(p=>{const i=Math.round(+p.page);if(i>=0&&i<n&&!byPage[i])byPage[i]=p;});
+ const vImg=v=>{const i=Math.round(+v);return Number.isFinite(i)&&i>=0&&i<imgs.length?i:null;};
+ // spreads (inside pairs only, both pages free)
+ const spreadOf={};(Array.isArray(plan&&plan.spreads)?plan.spreads:[]).forEach(s=>{const f=Math.round(+s.first),im=vImg(s.image);if(im==null||!(f>=1&&f%2==1&&f+1<=n-2)||!free[f]||!free[f+1]||spreadOf[f]!=null)return;
+  spreadOf[f]=spreadOf[f+1]={im,filter:oneOf(s.filter,FILTERS.map(x=>x[0]),T.filt)};const L={type:'image',id:nid(),src:imgs[im],x:.5,y:.5,w:1,ar:ars[im],rot:0,op:1,filter:spreadOf[f].filter};
+  const A=frameAspect('s');L.w=Math.max(1,A/ars[im]);P.spreads[spKey(f)]={layers:[L]};});
+ let used=new Set();
+ for(let i=0;i<n;i++){if(!free[i])continue;const pp=byPage[i]||{};const pg=P.pages[i];const r=rng(1000+i*7919);
+  pg.bg=hexOk(pp.bg)||'#ffffff';const tx=oneOf(pp.texture,TEXK.map(t=>t[0]),null);pg.tex=tx?{kind:tx,seed:1+Math.floor(r()*1e9),amt:.4,z:null}:null;
+  const ink=inkFor(pg.bg),edge=oneOf(pp.edge,EDGES.map(e=>e[0]),T.edge);
+  let title=cleanTxt(pp.title,LIM.title),cap=cleanTxt(pp.caption,LIM.caption);if(i==0&&!title)title=cleanTxt(plan&&plan.title,LIM.title)||'פאנזין';
+  const sts=(Array.isArray(pp.stickers)?pp.stickers:[]).map(s=>({text:cleanTxt(s&&s.text,LIM.sticker),style:oneOf(s&&s.style,STK.map(x=>x[0]),T.stk[Math.floor(r()*T.stk.length)])})).filter(s=>s.text).slice(0,LIM.stickers);
+  let ims=(Array.isArray(pp.images)?pp.images:[]).map(x=>({i:vImg(x&&x.index),focus:oneOf(x&&x.focus,FOCUS,'center'),filter:oneOf(x&&x.filter,FILTERS.map(f=>f[0]),T.filt)})).filter(x=>x.i!=null).slice(0,LIM.images);
+  const sp=spreadOf[i]!=null;if(sp)ims=[];ims.forEach(x=>used.add(x.i));
+  const L=pg.layers;const tilt=o.tone=='minimal'?0:1;
+  if(i==0){// cover: full-bleed image + big title sticker/text
+   if(ims.length)L.push(coverImg(imgs[ims[0].i],ars[ims[0].i],{x:0,y:0,w:1,h:1},ims[0].focus,ims[0].filter,'none',0));
+   const st=sts[0]?sts[0].style:T.stk[0];if(ims.length)L.push(stkLayer(title,st,.5,.2,.88,.085,tilt*Math.round((r()-.5)*8)));
+   else L.push(keepIn(txtLayer(title,T.tf,ink,{x:GM,y:.14,w:1-2*GM,h:.32},{smax:.13,smin:.04,lines:3})));
+   if(cap)L.push(keepIn(txtLayer(cap,T.cf,ims.length?'#161616':ink,{x:GM+.04,y:.8,w:1-2*GM-.08,h:.12},{smax:.045,lines:2,bg:ims.length?'#fffaf0':null})));
+   sts.slice(ims.length?1:0).forEach((s,k)=>L.push(stkLayer(s.text,s.style,k?.3:.72,ims.length?.66:.62,.6,.05,tilt*Math.round((r()-.5)*14))));continue;}
+  // inside / back: bands
+  const back=i==n-1;let top=GM,bot=1-GM;
+  if(title){const tl=txtLayer(title,T.tf,ink,{x:GM,y:GM,w:1-2*GM,h:back?.12:.13},{smax:back?.06:.075,smin:.03,lines:2,bg:sp?pg.bg:null});keepIn(tl);L.push(tl);top=lbox(tl).y1+.02;}
+  if(cap){const ch=back?.2:.17;const cl=txtLayer(cap,T.cf,ink,{x:GM,y:bot-ch,w:1-2*GM,h:ch},{smax:.042,smin:.022,lines:4,bg:sp?pg.bg:null});const b=lbox(cl);cl.y=bot-b.eh/2;keepIn(cl);L.unshift(cl);bot=lbox(cl).y0-.02;}
+  const reg={x:GM,y:top,w:1-2*GM,h:Math.max(.15,bot-top)};
+  if(back&&ims.length){const r2={x:.25,y:top+.02,w:.5,h:Math.min(.4,reg.h)};L.unshift(coverImg(imgs[ims[0].i],ars[ims[0].i],r2,ims[0].focus,ims[0].filter,edge,0));}
+  else if(ims.length==1)L.unshift(coverImg(imgs[ims[0].i],ars[ims[0].i],reg,ims[0].focus,ims[0].filter,edge,tilt*Math.round((r()-.5)*4)));
+  else if(ims.length==2){const g=.025,h2=(reg.h-g)/2;[0,1].forEach(k=>L.unshift(coverImg(imgs[ims[k].i],ars[ims[k].i],{x:reg.x+(k?.06:0),y:reg.y+k*(h2+g),w:reg.w-.06,h:h2},ims[k].focus,ims[k].filter,edge,tilt*(k?2:-2))));}
+  else if(ims.length>=3){const g=.025,h1=(reg.h-g)*.55,h2=reg.h-g-h1,w2=(reg.w-g)/2;
+   L.unshift(coverImg(imgs[ims[0].i],ars[ims[0].i],{x:reg.x,y:reg.y,w:reg.w,h:h1},ims[0].focus,ims[0].filter,edge,0));
+   [1,2].forEach(k=>L.unshift(coverImg(imgs[ims[k].i],ars[ims[k].i],{x:reg.x+(k==1?w2+g:0),y:reg.y+h1+g,w:w2,h:h2},ims[k].focus,ims[k].filter,edge,tilt*(k==1?2:-2))));}
+  // the text layers must stay above images: move texts to the end
+  const texts=L.filter(l=>l.type=='text');pg.layers=L.filter(l=>l.type!='text').concat(texts);
+  sts.forEach((s,k)=>{const cx=k?.3:.7,cy=k?reg.y+reg.h*.82:reg.y+reg.h*.15;pg.layers.push(stkLayer(s.text,s.style,cx,cy,.62,.05,tilt*Math.round((r()-.5)*16)));});}
+ cur=0;sel=null;tool=null;crop=null;tab='img';refreshAll();return{used:[...used]};}
+// test hook: every text/sticker inside the page & sane size
+function genCheck(){const bad=[];P.pages.forEach((p,i)=>(p.layers||[]).forEach(L=>{if(L.type!='text'&&L.type!='sticker')return;const b=lbox(L);
+ if(b.x0<0.01||b.x1>.99||b.y0<.01||b.y1>.99)bad.push([i,'out',L.text,b]);if(L.type=='text'&&(L.size<.02||L.size>.14))bad.push([i,'size',L.text,L.size]);
+ if(L.type=='text'&&L.text.split('\n').length>4)bad.push([i,'lines',L.text]);if(L.type=='sticker'&&(L.w>.9||(L.text||'').length>LIM.sticker+1))bad.push([i,'stk',L.text,L.w]);}));return bad;}
+window.__gen={apply:genApply,check:genCheck,get state(){return gen},GEM_MODELS,schema:gSchema,prompt:gPrompt};
+
+// ===================== start screen =====================
+let st={mode:null};
+function hasWork(){return P.pages.some(pageUsed)||Object.values(P.spreads||{}).some(s=>(s.layers||[]).length);}
+async function keepPrev(){if(hasWork()){try{await dbPutK('prev',JSON.stringify(P));}catch(e){}}}
+function baseProject(n){const k={};Object.keys(P).forEach(x=>{if(x!='pages'&&x!='spreads')k[x]=P[x];});return Object.assign(k,{mode:+n,pages:[],spreads:{}});}
+// replace the whole project; the old one stays one ↶ away and is also kept as 'prev' in storage
+async function swapProject(np,fill){await keepPrev();histPush();P=np;ensure();cur=0;sel=null;tool=null;crop=null;tab='img';
+ $('mode').value=P.mode;$('dir').value=P.dir||'rtl';$('lay16').value=P.layout16||'loop';help();if(fill)fill();refreshAll();}
+function startVisible(){const s=$('start');return !!(s&&s.classList.contains('on'));}
+function startHide(){const s=$('start');if(s)s.classList.remove('on');document.documentElement.classList.remove('stOn');}
+async function startShow(){let s=$('start');if(!s){s=document.createElement('div');s.id='start';s.setAttribute('dir','rtl');document.body.appendChild(s);}
+ st.prev=null;try{const p=await dbGetK('prev');if(p&&p!==JSON.stringify(P))st.prev=p;}catch(e){}
+ s.classList.add('on');document.documentElement.classList.add('stOn');const t=$('toast');if(t)t.style.opacity=0;stRender();}
+function coverThumb(){try{const [pw,ph]=pageMM();const w=90,h=Math.round(w*ph/pw);return renderPage(0,w,h).toDataURL('image/jpeg',.8);}catch(e){return '';}}
+function stRender(){const s=$('start');if(!s)return;const work=hasWork();
+ let h=`<div class="stIn"><div class="stLogo">✂️ יוצר פאנזינים</div>`;
+ if(!st.mode){
+  h+=work?`<button class="stCard stCont" data-s="cont"><img src="${coverThumb()}" alt=""><span><b>▶ המשך הפאנזין הקיים</b><small>הכול שמור במכשיר הזה</small></span></button><div class="stOr">או פאנזין חדש:</div>`:`<div class="stOr">איך מתחילים?</div>`;
+  h+=`<button class="stCard" data-s="blank"><span class="ic">🆕</span><span><b>דף ריק</b><small>מתחילים מאפס בעורך</small></span></button>
+  <button class="stCard" data-s="img"><span class="ic">🖼</span><span><b>מדימויים</b><small>מעלים כמה תמונות והן מתחלקות לעמודים לפי הסדר</small></span></button>
+  <button class="stCard" data-s="ai"><span class="ic">✨</span><span><b>דימויים + רעיון</b><small>תמונות ורעיון – Gemini מציע טיוטה לכל העמודים</small></span></button>`;
+  if(st.prev)h+=`<button class="stLink" data-s="restore">↩ שחזור הפאנזין הקודם</button>`;
+  if(work)h+=`<p class="hint stNote">פאנזין חדש לא מוחק מיד את הקיים: בעורך אפשר לבטל עם ↶, ו"שחזור הפאנזין הקודם" מופיע כאן.</p>`;}
+ else{const ai=st.mode=='ai',n=+(gen.n||P.mode||8);
+  h+=`<div class="stForm"><div class="genH"><b>${ai?'✨ דימויים + רעיון':'🖼 פאנזין מדימויים'}</b><button data-s="back" title="חזרה">→ חזרה</button></div>
+  <div class="lbl">1. תמונות</div><div class="row"><button id="gPick" class="addb">➕ בחירת תמונות</button><button id="gPaste" class="addb">📋 הדבקה</button></div><div class="hint" id="gCnt"></div><div id="gThumbs"></div>
+  ${ai?'':'<p class="hint">תמונה אחת לכל עמוד לפי הסדר (הראשונה בכריכה). אם יש יותר תמונות מעמודים – כמה תמונות בעמוד.</p>'}
+  <div class="lbl">2. כמה עמודים</div><div class="row stN"><label><input type="radio" name="gN" value="8" ${n==8?'checked':''}> 8 עמודים</label><label><input type="radio" name="gN" value="16" ${n==16?'checked':''}> 16 עמודים</label></div>`;
+  if(ai){const key=localStorage.getItem(GKEY)||'';
+   h+=`<div class="lbl">3. נושא או רעיון</div><textarea id="gIdea" rows="3" placeholder="למשל: פאנזין על הים בחורף, קצת מצחיק">${esc(gen.idea||'')}</textarea>
+   <div class="lbl">4. הנחיות (לא חובה)</div><textarea id="gGuide" rows="2" placeholder="למשל: בלי הרבה טקסט, כריכה צעקנית, לסיים במשפט אופטימי">${esc(gen.guide||'')}</textarea>
+   <div class="lbl">5. סגנון (לא חובה)</div><div class="chips" id="gTone">${TONES.map(([v,nm])=>`<button data-t="${v}" class="${(gen.tone||'')==v?'on':''}">${nm}</button>`).join('')}</div>
+   <details id="gKeyBox" ${key?'':'open'}><summary>🔑 מפתח Gemini ${key?'(שמור במכשיר הזה)':'– צריך פעם אחת'}</summary>
+   <p class="hint">יוצרים מפתח חינמי ב־<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> ומדביקים כאן. המפתח נשמר רק בדפדפן הזה ונשלח רק ל־Google. התמונות והרעיון נשלחים ל־Gemini כדי ליצור את הטיוטה.</p>
+   <div class="row"><input type="password" id="gKey" placeholder="הדביקו כאן את המפתח" value="${esc(key)}" autocomplete="off" dir="ltr"><button id="gForget" ${key?'':'disabled'}>שכח מפתח</button></div></details>`;}
+  h+=`<div id="gProg" hidden><div class="gBar"><div id="gBarIn"></div></div><span id="gStep" class="hint"></span></div><p id="gErr" class="warn" hidden></p>
+  <div class="row"><button id="gGo" class="pri">${ai?'✨ צור טיוטה':'▶ צור פאנזין'}</button><button id="gStop" hidden>עצור</button></div></div>`;}
+ if(!st.mode)h+=`<p class="hint stNote">הכול נשמר רק במכשיר הזה. אחר כך: ⚙️ בעורך להגדרות, 🖨 להדפסה.</p>`;
+ s.innerHTML=h+'</div>';stWire();}
+function stWire(){const s=$('start');const q=x=>s.querySelector(x);
+ s.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>stAct(b.dataset.s));if(!st.mode)return;
+ q('#gPick').onclick=()=>$('gFile').click();q('#gPaste').onclick=stPasteBtn;genThumbs();
+ s.querySelectorAll('[name=gN]').forEach(r=>r.onchange=()=>gen.n=+r.value);
+ if(st.mode=='ai'){q('#gIdea').oninput=e=>gen.idea=e.target.value;q('#gGuide').oninput=e=>gen.guide=e.target.value;
+  q('#gTone').querySelectorAll('button').forEach(b=>b.onclick=()=>{gen.tone=b.dataset.t;q('#gTone').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));});
+  q('#gKey').onchange=e=>{const v=e.target.value.trim();if(v)localStorage.setItem(GKEY,v);q('#gForget').disabled=!v;};
+  q('#gForget').onclick=()=>{localStorage.removeItem(GKEY);q('#gKey').value='';q('#gForget').disabled=true;toast('המפתח נמחק מהמכשיר');};
+  q('#gGo').onclick=genRun;q('#gStop').onclick=()=>gen.abort&&gen.abort.abort();}
+ else q('#gGo').onclick=startFromImages;}
+async function stAct(a){if(a=='cont'){startHide();return;}
+ if(a=='blank'){await swapProject(baseProject(P.mode||8));startHide();toast('דף ריק – מתחילים!');return;}
+ if(a=='img'||a=='ai'){st.mode=a;if(!gen.n)gen.n=+P.mode||8;stRender();window.scrollTo(0,0);return;}
+ if(a=='back'){st.mode=null;stRender();return;}
+ if(a=='restore'&&st.prev){try{await swapProject(migrate(JSON.parse(st.prev)));startHide();toast('הפאנזין הקודם שוחזר');}catch(e){toast('לא הצלחתי לשחזר');}}}
+async function stPasteBtn(){if(!navigator.clipboard||!navigator.clipboard.read){toast('הדפדפן הזה לא מאפשר הדבקה מהכפתור. נסו Ctrl+V או לחיצה ארוכה ← הדבקה.');return;}
+ try{const fs=[];for(const it of await navigator.clipboard.read()){const ty=it.types.find(t=>t.startsWith('image/'));if(ty)fs.push(new File([await it.getType(ty)],'paste.'+ty.split('/')[1],{type:ty}));}
+  if(!fs.length){toast('אין תמונה בלוח. העתיקו תמונה ונסו שוב.');return;}await genAddFiles(fs);toast('התמונה הודבקה');}
+ catch(e){toast(e&&e.name=='NotAllowedError'?'אין הרשאה לקרוא מהלוח. אשרו גישה ללוח ונסו שוב.':'לא הצלחתי להדביק: '+(e&&e.message||e));}}
+// deterministic: images in order, one per page; with more images than pages, several per page
+function imgRegions(c){const g=.02,m=GM;if(c==1)return[{x:0,y:0,w:1,h:1}];const W=1-2*m,H=1-2*m;
+ if(c==2)return[0,1].map(k=>({x:m,y:m+k*(H+g)/2,w:W,h:(H-g)/2}));
+ if(c==3){const h1=(H-g)*.55,h2=H-g-h1,w2=(W-g)/2;return[{x:m,y:m,w:W,h:h1},{x:m+w2+g,y:m+h1+g,w:w2,h:h2},{x:m,y:m+h1+g,w:w2,h:h2}];}
+ const cols=c<=4?2:3,rows=Math.ceil(c/cols),cw=(W-g*(cols-1))/cols,rh=(H-g*(rows-1))/rows;const out=[];
+ for(let k=0;k<c;k++){const col=k%cols,row=Math.floor(k/cols);out.push({x:1-m-cw-col*(cw+g),y:m+row*(rh+g),w:cw,h:rh});}return out;}// RTL: first image on the right
+async function startFromImages(){gErr('');if(!gen.imgs.length){gErr('בחרו או הדביקו לפחות תמונה אחת.');return;}
+ const n=+(gen.n||8),srcs=gen.imgs.map(g=>g.src),k=srcs.length;gUI(1,30,'מסדר את התמונות בעמודים…');const ars=[];for(const s of srcs){const im=await loadImg(s);ars.push(im.naturalWidth?im.naturalHeight/im.naturalWidth:.75);}
+ const per=i=>k<=n?(i<k?[i]:[]):Array.from({length:Math.floor((i+1)*k/n)-Math.floor(i*k/n)},(_,j)=>Math.floor(i*k/n)+j);
+ await swapProject(baseProject(n),()=>{for(let i=0;i<n;i++){const ids=per(i);const rs=imgRegions(ids.length);ids.forEach((j,t)=>P.pages[i].layers.push(coverImg(srcs[j],ars[j],rs[t],'center','none','none',0)));}});
+ gUI(0);startHide();toast('נוצר פאנזין עם '+k+' תמונות ב־'+n+' עמודים – הקישו על תמונה כדי לערוך');}
+// paste / keys while the start screen is open go to the start screen, not the editor underneath
+window.addEventListener('paste',e=>{if(!startVisible())return;const t=document.activeElement;if(t&&(t.tagName=='TEXTAREA'||(t.tagName=='INPUT'&&t.type!='radio'&&t.type!='file')))return;
+ e.stopImmediatePropagation();e.preventDefault();const fs=[...(e.clipboardData&&e.clipboardData.items||[])].filter(i=>i.kind=='file'&&i.type.startsWith('image/')).map(i=>i.getAsFile()).filter(Boolean);
+ if(!fs.length)return;if(!st.mode){st.mode='img';if(!gen.n)gen.n=+P.mode||8;stRender();}genAddFiles(fs);},true);
+window.addEventListener('keydown',e=>{if(startVisible())e.stopImmediatePropagation();},true);
+$('newZ').onclick=$('newZ2').onclick=()=>{const m=document.querySelector('details.menu');if(m)m.open=false;
+ if(hasWork()&&!confirm('לחזור למסך הפתיחה ולהתחיל פאנזין חדש?\nהפאנזין הנוכחי נשמר: אפשר להמשיך אותו מהמסך, ואחרי שמתחילים חדש – לבטל עם ↶ או לשחזר מהמסך.'))return;st.mode=null;startShow();};
+booted.then(()=>{if(!/[?&]nostart/.test(location.search))startShow();});
 
 
 </script></body></html>
