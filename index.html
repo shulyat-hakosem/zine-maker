@@ -61,6 +61,7 @@ textarea{width:100%;direction:rtl;font-size:15px}
 .stCont{background:#fff3c4!important;border-color:#c9a227!important}.stCont img{width:54px;border-radius:4px;box-shadow:0 1px 3px #0005;flex:none}
 .stLink{display:block;margin:12px auto;background:none!important;border:0!important;box-shadow:none!important;color:#fff3c4!important;text-decoration:underline;font-size:15px}.stNote{color:#d6e2d3!important;text-align:center}
 .stForm{background:#fffaf0;border-radius:14px;padding:14px 16px;box-shadow:0 4px 14px #0005;margin-top:10px}.stForm .genH{display:flex;justify-content:space-between;align-items:center;font-size:18px}.stForm .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:5px 0}.stN label{font-size:16px;margin-left:14px}
+#gKey.masked{-webkit-text-security:disc;text-security:disc}#gEye{padding:4px 8px!important}
 .stForm .addb{flex:1;padding:10px!important;font-size:15px!important}
 .modalBg{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:20}.modalBg.on{display:flex}
 .dlBox{background:#fffaf0;color:#222;padding:14px 18px;border-radius:8px;width:min(92vw,420px);box-shadow:0 6px 20px #0006}
@@ -1020,7 +1021,8 @@ function dupPage(){const n=N();if(cur>=n-2){status('אין מקום לשכפול
  if(last.layers.length&&!confirm('השכפול ידחוף עמודים קדימה, ותוכן '+label(n-2)+' יימחק. להמשיך?'))return;flattenSpreads();P.pages.splice(n-2,1);const c=clone(P.pages[cur]);c.layers.forEach(l=>l.id=nid());P.pages.splice(cur+1,0,c);cur++;sel=null;refreshAll();}
 $('dupP').onclick=dupPage;$('copyP').onclick=copyPage;$('pasteP').onclick=pastePage;
 function flattenSpreads(){Object.keys(P.spreads||{}).forEach(k=>{k=+k;(P.spreads[k].layers||[]).forEach(L=>{P.pages[k].layers.unshift(fromSp(L,spHalf(k)));});});P.spreads={};}
-function isTyping(){const a=document.activeElement;return a&&(a.tagName=='TEXTAREA'||a.isContentEditable||(a.tagName=='INPUT'&&/text|number|search|url|email/.test(a.type)));}
+// any editable text field (incl. password / the Gemini key) – our shortcuts and image-paste must leave it alone
+function isTyping(){const a=document.activeElement;return !!a&&(a.tagName=='TEXTAREA'||a.isContentEditable||(a.tagName=='INPUT'&&!/^(checkbox|radio|file|range|color|button|submit|reset|image)$/i.test(a.type||'text')));}
 document.addEventListener('keydown',e=>{if(isTyping())return;
  if((e.key=='Delete'||e.key=='Backspace')&&sel){e.preventDefault();delSel();return;}
  if(e.key=='Escape'){if(crop){crop=null;refreshAll();return;}sel=null;if(tool=='draw'){tool=null;tab='img';}$('helpModal').classList.remove('on');refreshAll();return;}
@@ -1341,7 +1343,7 @@ async function gCall(key,parts,signal){let last;
   if(res.status>=500)throw new GenErr('השרת של Gemini עמוס כרגע ('+res.status+'). נסו שוב בעוד רגע.');
   throw new GenErr('שגיאה מ־Gemini ('+res.status+'): '+msg.slice(0,140));}
  throw last||new GenErr('לא נמצא מודל זמין.');}
-async function genRun(){if(gen.busy)return;gErr('');const key=(($('gKey')||{}).value||localStorage.getItem(GKEY)||'').trim();
+async function genRun(){if(gen.busy)return;gErr('');const key=cleanKey(($('gKey')||{}).value||localStorage.getItem(GKEY)||'');
  if(!key){gErr('צריך מפתח Gemini – פתחו את 🔑 למטה והדביקו מפתח.');const d=$('gKeyBox');if(d)d.open=true;return;}localStorage.setItem(GKEY,key);
  const idea=(($('gIdea')||{}).value||'').trim();if(!idea&&!gen.imgs.length){gErr('כתבו רעיון קצר או הוסיפו תמונות.');return;}
  const keep=false;const n=+(gen.n||P.mode);const guide=cleanTxt(($('gGuide')||{}).value,600);
@@ -1434,6 +1436,7 @@ function genCheck(){const bad=[];P.pages.forEach((p,i)=>(p.layers||[]).forEach(L
 window.__gen={apply:genApply,check:genCheck,get state(){return gen},GEM_MODELS,schema:gSchema,prompt:gPrompt};
 
 // ===================== start screen =====================
+const cleanKey=v=>String(v||'').replace(/[\s\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]+/g,'');
 let st={mode:null};
 function hasWork(){return P.pages.some(pageUsed)||Object.values(P.spreads||{}).some(s=>(s.layers||[]).length);}
 async function keepPrev(){if(hasWork()){try{await dbPutK('prev',JSON.stringify(P));}catch(e){}}}
@@ -1467,7 +1470,7 @@ function stRender(){const s=$('start');if(!s)return;const work=hasWork();
    <div class="lbl">5. סגנון (לא חובה)</div><div class="chips" id="gTone">${TONES.map(([v,nm])=>`<button data-t="${v}" class="${(gen.tone||'')==v?'on':''}">${nm}</button>`).join('')}</div>
    <details id="gKeyBox" ${key?'':'open'}><summary>🔑 מפתח Gemini ${key?'(שמור במכשיר הזה)':'– צריך פעם אחת'}</summary>
    <p class="hint">יוצרים מפתח חינמי ב־<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> ומדביקים כאן. המפתח נשמר רק בדפדפן הזה ונשלח רק ל־Google. התמונות והרעיון נשלחים ל־Gemini כדי ליצור את הטיוטה.</p>
-   <div class="row"><input type="password" id="gKey" placeholder="הדביקו כאן את המפתח" value="${esc(key)}" autocomplete="off" dir="ltr"><button id="gForget" ${key?'':'disabled'}>שכח מפתח</button></div></details>`;}
+   <div class="row"><input type="text" id="gKey" class="masked" placeholder="הדביקו כאן את המפתח" value="${esc(key)}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore dir="ltr"><button id="gEye" title="הצגה / הסתרה של המפתח" aria-label="הצגת המפתח">👁</button><button id="gForget" ${key?'':'disabled'}>שכח מפתח</button></div></details>`;}
   h+=`<div id="gProg" hidden><div class="gBar"><div id="gBarIn"></div></div><span id="gStep" class="hint"></span></div><p id="gErr" class="warn" hidden></p>
   <div class="row"><button id="gGo" class="pri">${ai?'✨ צור טיוטה':'▶ צור פאנזין'}</button><button id="gStop" hidden>עצור</button></div></div>`;}
  if(!st.mode)h+=`<p class="hint stNote">הכול נשמר רק במכשיר הזה. אחר כך: ⚙️ בעורך להגדרות, 🖨 להדפסה.</p>`;
@@ -1478,7 +1481,9 @@ function stWire(){const s=$('start');const q=x=>s.querySelector(x);
  s.querySelectorAll('[name=gN]').forEach(r=>r.onchange=()=>gen.n=+r.value);
  if(st.mode=='ai'){q('#gIdea').oninput=e=>gen.idea=e.target.value;q('#gGuide').oninput=e=>gen.guide=e.target.value;
   q('#gTone').querySelectorAll('button').forEach(b=>b.onclick=()=>{gen.tone=b.dataset.t;q('#gTone').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));});
-  q('#gKey').onchange=e=>{const v=e.target.value.trim();if(v)localStorage.setItem(GKEY,v);q('#gForget').disabled=!v;};
+  const saveKey=e=>{const el=e.target,v=cleanKey(el.value);if(el.value!==v)el.value=v;if(v)localStorage.setItem(GKEY,v);else localStorage.removeItem(GKEY);q('#gForget').disabled=!v;};
+  q('#gKey').addEventListener('input',saveKey);q('#gKey').addEventListener('change',saveKey);
+  q('#gEye').onclick=()=>{const k=q('#gKey');const m=k.classList.toggle('masked');q('#gEye').textContent=m?'👁':'🙈';};
   q('#gForget').onclick=()=>{localStorage.removeItem(GKEY);q('#gKey').value='';q('#gForget').disabled=true;toast('המפתח נמחק מהמכשיר');};
   q('#gGo').onclick=genRun;q('#gStop').onclick=()=>gen.abort&&gen.abort.abort();}
  else q('#gGo').onclick=startFromImages;}
