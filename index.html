@@ -37,7 +37,7 @@ main{flex:1;min-height:0;display:flex;gap:8px;padding:8px}
 #edWrap{flex:2 1 44%;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 #edTitle{height:18px}
 #edBox{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;touch-action:none}
-#ed{touch-action:none;background:#fff;box-shadow:0 1px 4px #0004}
+#ed{touch-action:none;background:#fff;box-shadow:0 1px 4px #0004;position:relative;z-index:1}#edBox{position:relative}#edGhost{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
 #ed.draw{cursor:crosshair}
 #panel{flex:0 0 270px;background:#fff;border-radius:6px;padding:10px;overflow:auto;min-height:0}
 #panel h3{margin:0 0 8px;font-size:15px}
@@ -131,7 +131,7 @@ button.small{font-size:12px;padding:2px 7px}.cropbox{border:2px dashed #e8590c;b
 </header>
 <main>
 <div id="panel"></div>
-<div id="edWrap"><b id="edTitle"></b><div id="edBox"><canvas id="ed"></canvas></div></div>
+<div id="edWrap"><b id="edTitle"></b><div id="edBox"><canvas id="edGhost" aria-hidden="true"></canvas><canvas id="ed"></canvas></div></div>
 <div id="gridWrap"><div id="pageBar"><button id="pageOpts" title="צבע וטקסטורה של הדף">🎨 רקע הדף</button><button id="dupP" title="עותק של העמוד אחריו">📄 שכפול עמוד</button><button id="copyP">העתק עמוד</button><button id="pasteP">הדבק עמוד</button></div><div id="grid"></div></div>
 </main>
 <div id="dlModal" class="modalBg"><div class="dlBox"><b>הדפסה – PDF</b>
@@ -790,10 +790,15 @@ function refreshSoon(){clearTimeout(rs);rs=setTimeout(refreshAll,60);}
 
 // ===================== editor & direct manipulation =====================
 const ed=$('ed');let EW=400,EH=560,DPR=1;
-function refreshEditor(){const [w,h]=pageMM();const bx=$('edBox');const ch=Math.max(100,bx.clientHeight-6),cw=Math.max(80,bx.clientWidth-6);const ew=Math.min(cw,ch*w/h);
+function refreshEditor(){const [w,h]=pageMM();const bx=$('edBox');const ch=Math.max(100,bx.clientHeight-6),cw=Math.max(80,bx.clientWidth-6);const ew=Math.min(cw*.92,ch*.92*w/h);// leave a margin to show what sticks out of the page
  DPR=Math.min(2,devicePixelRatio||1);ed.style.width=ew+'px';ed.style.height=(ew*h/w)+'px';EW=ed.width=Math.round(ew*DPR);EH=ed.height=Math.round(ew*h/w*DPR);
  const x=ed.getContext('2d');paintPage(x,cur,EW,EH,{safe:true});if(sel&&!layerAlive(sel))sel=null;if(crop&&!(sel&&sel.L===crop.L))crop=null;if(crop)drawCrop(x);else if(sel&&tool!='draw')drawHandles(x);
- $('edTitle').textContent=label(cur)+(spLayers(cur)?' · 🔗 כפולה עם '+label(partner(cur)):'');ed.classList.toggle('draw',tool=='draw');}
+ drawGhost(ew,ew*h/w);$('edTitle').textContent=label(cur)+(spLayers(cur)?' · 🔗 כפולה עם '+label(partner(cur)):'');ed.classList.toggle('draw',tool=='draw');}
+// faint preview of everything that sticks out beyond the page (it is NOT printed – the page edge is the paper edge)
+function drawGhost(ew,eh){const g=$('edGhost'),bx=$('edBox');if(!g)return;const gw=bx.clientWidth,gh=bx.clientHeight;g.width=Math.round(gw*DPR);g.height=Math.round(gh*DPR);const x=g.getContext('2d');x.clearRect(0,0,g.width,g.height);
+ const pg=P.pages[cur];if(!pg)return;const br=bx.getBoundingClientRect(),er=ed.getBoundingClientRect();const ox=(er.left-br.left)*DPR,oy=(er.top-br.top)*DPR;
+ const t=document.createElement('canvas');t.width=g.width;t.height=g.height;const y=x;{const x=t.getContext('2d');x.save();x.translate(ox,oy);const sl=spLayers(cur);if(sl){x.save();x.translate(spHalf(cur)?-EW:0,0);sl.forEach(L=>{if(L.type!='draw')drawLayer(x,L,2*EW,EH);});x.restore();}
+ (pg.layers||[]).forEach(L=>{if(L.type!='draw')drawLayer(x,L,EW,EH);});x.restore();}y.globalAlpha=.3;y.drawImage(t,0,0);}
 function ownerArr(s){return s.own=='s'?(P.spreads[spKey(cur)]||{layers:[]}).layers:P.pages[cur].layers;}
 function layerAlive(s){return ownerArr(s).includes(s.L);}
 function frame(s){return s.own=='s'?{W:2*EW,H:EH,ox:spHalf(cur)?-EW:0}:{W:EW,H:EH,ox:0};}
@@ -905,7 +910,7 @@ function selOptions(){const L=sel.L,t=L.type;
     :`<p class="hint">גררו את הצורה כדי להזיז אותה, ואת הריבועים בפינות כדי לשנות גודל.</p>${m.k=='tri'||m.k=='diag'?'<div class="row"><button data-a="mrot">↻ סובב צורה</button></div>':''}`}
    <div class="row"><button data-a="cropdone" class="addb">✔ סיום חיתוך</button>${L.mask?'<button data-a="uncrop">בטל חיתוך</button>':''}</div><p class="hint">קצוות (גזור/זיגזג/קרוע) הולכים לפי קו החיתוך.</p></div>`;})();
   if(t=='image'){const f=L.filter||'none';const needInk=L.mult||['riso','stamp','halftone','misreg'].includes(f);
-   return `<h3>התמונה שנבחרה${sel.own=='s'?' (כפולה)':''}</h3><div class="row"><button data-a="fill">מלא</button><button data-a="fit">התאם</button><button data-a="spread">${sel.own=='s'?'↩ בטל כפולה':'↔ פרוש על כפולה'}</button><button data-a="replace">🔄 החלפה</button></div>${cropUI}
+   return `<h3>התמונה שנבחרה${sel.own=='s'?' (כפולה)':''}</h3><div class="row"><button data-a="fit" title="כל התמונה בתוך העמוד, בלי חיתוך">⤢ תמונה מלאה</button><button data-a="fill" title="ממלא את כל העמוד – חלק מהתמונה ייחתך">⬛ מלא עמוד</button><button data-a="spread">${sel.own=='s'?'↩ בטל כפולה':'↔ פרוש על כפולה'}</button><button data-a="replace">🔄 החלפה</button></div>${cropUI}
    <div class="lbl">מראה הדפסה</div><div class="chips">${FILTERS.map(([v,n])=>chip('filter',v,n,f==v)).join('')}</div>
    <div class="row"><label title="הלבן נעשה שקוף ורק הקווים/הצבע נשארים – מצוין לסקיצות סרוקות"><input type="checkbox" id="lmult" ${L.mult?'checked':''}> שקוף (מולטיפליי)</label>${needInk?`<label>דיו <input type="color" id="link" value="${L.ink||INKDEF[f]}"></label>`:''}</div>${f=='halftone'?`<div class="row">גודל נקודות <input type="range" id="lhs" min="60" max="320" step="5" value="${L.hs||HSDEF}" style="direction:ltr" title="שמאלה: נקודות גדולות · ימינה: עדינות"></div>`:''}${edges}${opac}${order}`;}
   if(t=='text')return `<h3>הטקסט שנבחר</h3><textarea id="ltext" rows="3">${(L.text||'').replace(/</g,'&lt;')}</textarea>
@@ -967,7 +972,7 @@ case 'tab':setTab(v);return;case 'addtxt':addText();return;case 'stkadd':addStic
  case 'dup':{const c=clone(L);c.id=nid();c.x+=.04;c.y+=.04;ownerArr(sel).push(c);sel={own:sel.own,L:c};break;}
  case 'del':delSel();return;
  case 'edge':L.edge=v;if(!L.eseed)L.eseed=1+Math.floor(Math.random()*1e9);break;case 'ereroll':if(!L.edge||L.edge=='none')L.edge='torn';L.eseed=1+Math.floor(Math.random()*1e9);break;
- case 'fill':case 'fit':fillL(L,sel.own,a);break;
+ case 'fill':fillL(L,sel.own,'fill');delete L.mask;crop=null;break;case 'fit':fillL(L,sel.own,'fit');delete L.mask;crop=null;break;
  case 'spread':toggleSpread();return;
  case 'filter':L.filter=v;break;case 'font':{const i=FONTS.indexOf(L.font);L.font=FONTS[(i+1)%FONTS.length];break;}
  case 'vary':L.seed=1+Math.floor(Math.random()*1e9);if(PAL[L.type])L.color=PAL[L.type][Math.floor(Math.random()*PAL[L.type].length)];break;
@@ -988,7 +993,7 @@ async function loadImg(src){const im=getImg(src);if(!im.complete||!im.naturalWid
 async function addImageSrc(src,opts={}){await loadImg(src);const p=P.pages[opts.page??cur];const hasImg=p.layers.some(l=>l.type=='image')||spLayers(opts.page??cur);
  const L={type:'image',id:nid(),src,x:.5,y:.5,w:.6,rot:0,op:1};ar(L);const n=p.layers.filter(l=>l.type=='image').length;
  if(opts.grid){const g=opts.grid,cw=.86/g.cols,chh=.86/g.rows,[pw,ph]=pageMM(),ap=ph/pw;const col=g.k%g.cols,row=Math.floor(g.k/g.cols);L.w=Math.min(cw*.92,chh*.92/(L.ar*ap));L.x=.93-cw*(col+.5);L.y=.07+chh*(row+.5);}
- else if(!hasImg||opts.fill)fillL(L,'p','fill');else{L.x=.5+((n%4)-1.5)*.05;L.y=.5+((n%4)-1.5)*.05;}
+ else if(opts.fill)fillL(L,'p','fill');else if(!hasImg)fillL(L,'p','fit');else{L.x=.5+((n%4)-1.5)*.05;L.y=.5+((n%4)-1.5)*.05;}
  if(opts.fill)p.layers.unshift(L);else{const di=p.layers.findIndex(l=>l.type=='draw');di>=0?p.layers.splice(di,0,L):p.layers.push(L);}
  if((opts.page??cur)==cur){sel={own:'p',L};if(tool=='draw')tool=null;}refreshAll();return L;}
 async function addImageFiles(files){const fs=files.filter(f=>!f.type||f.type.startsWith('image/')||/\.(jpe?g|png|gif|webp|bmp|heic|heif|avif)$/i.test(f.name||''));if(!fs.length){toast('לא נמצאו קבצי תמונה');return;}
@@ -1502,10 +1507,13 @@ function imgRegions(c){const g=.02,m=GM;if(c==1)return[{x:0,y:0,w:1,h:1}];const 
  if(c==3){const h1=(H-g)*.55,h2=H-g-h1,w2=(W-g)/2;return[{x:m,y:m,w:W,h:h1},{x:m+w2+g,y:m+h1+g,w:w2,h:h2},{x:m,y:m+h1+g,w:w2,h:h2}];}
  const cols=c<=4?2:3,rows=Math.ceil(c/cols),cw=(W-g*(cols-1))/cols,rh=(H-g*(rows-1))/rows;const out=[];
  for(let k=0;k<c;k++){const col=k%cols,row=Math.floor(k/cols);out.push({x:1-m-cw-col*(cw+g),y:m+row*(rh+g),w:cw,h:rh});}return out;}// RTL: first image on the right
+// very tall / very wide images (e.g. a 1:3 comic strip) are shown whole instead of being cropped to the page
+function farOff(a){const A=frameAspect('p'),r=a/A;return r>1.5||r<1/1.5;}
+function fitImg(src,a){const L={type:'image',id:nid(),src,x:.5,y:.5,w:1,ar:a,rot:0,op:1};fillL(L,'p','fit');return L;}
 async function startFromImages(){gErr('');if(!gen.imgs.length){gErr('בחרו או הדביקו לפחות תמונה אחת.');return;}
  const n=+(gen.n||8),srcs=gen.imgs.map(g=>g.src),k=srcs.length;gUI(1,30,'מסדר את התמונות בעמודים…');const ars=[];for(const s of srcs){const im=await loadImg(s);ars.push(im.naturalWidth?im.naturalHeight/im.naturalWidth:.75);}
  const per=i=>k<=n?(i<k?[i]:[]):Array.from({length:Math.floor((i+1)*k/n)-Math.floor(i*k/n)},(_,j)=>Math.floor(i*k/n)+j);
- await swapProject(baseProject(n),()=>{for(let i=0;i<n;i++){const ids=per(i);const rs=imgRegions(ids.length);ids.forEach((j,t)=>P.pages[i].layers.push(coverImg(srcs[j],ars[j],rs[t],'center','none','none',0)));}});
+ await swapProject(baseProject(n),()=>{for(let i=0;i<n;i++){const ids=per(i);const rs=imgRegions(ids.length);ids.forEach((j,t)=>P.pages[i].layers.push(ids.length==1&&farOff(ars[j])?fitImg(srcs[j],ars[j]):coverImg(srcs[j],ars[j],rs[t],'center','none','none',0)));}});
  gUI(0);startHide();toast('נוצר פאנזין עם '+k+' תמונות ב־'+n+' עמודים – הקישו על תמונה כדי לערוך');}
 // paste / keys while the start screen is open go to the start screen, not the editor underneath
 window.addEventListener('paste',e=>{if(!startVisible())return;const t=document.activeElement;if(t&&(t.tagName=='TEXTAREA'||(t.tagName=='INPUT'&&t.type!='radio'&&t.type!='file')))return;
